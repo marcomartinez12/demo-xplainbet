@@ -1,11 +1,11 @@
-/* Estilos generales */
+/* Estilos generales - Adaptado a OneFootball */
 body {
-    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #0c0e14;
+    font-family: 'Roboto', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #121212;
     color: #e0e0e0;
     background-image: 
-        radial-gradient(circle at 25% 25%, rgba(10, 25, 47, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 75% 75%, rgba(15, 32, 58, 0.1) 0%, transparent 50%);
+        radial-gradient(circle at 25% 25%, rgba(12, 20, 12, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(12, 20, 12, 0.3) 0%, transparent 50%);
     background-attachment: fixed;
 }
 
@@ -21,15 +21,15 @@ header {
 
 header h1 {
     font-weight: 800;
-    color: #2a5298;
-    text-shadow: 0 0 10px rgba(42, 82, 152, 0.3);
+    color: #c1ff35; /* Verde amarillento de OneFootball */
+    text-shadow: 0 0 10px rgba(193, 255, 53, 0.3);
     letter-spacing: 1px;
     transition: all 0.3s ease;
 }
 
 header h1:hover {
     transform: translateY(-3px);
-    text-shadow: 0 0 15px rgba(42, 82, 152, 0.5);
+    text-shadow: 0 0 15px rgba(193, 255, 53, 0.5);
 }
 
 header p.lead {
@@ -39,7 +39,7 @@ header p.lead {
 
 /* Estilos para las tarjetas */
 .card {
-    background-color: #161b26;
+    background-color: #1a1a1a;
     border: none;
     border-radius: 12px;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
@@ -49,7 +49,7 @@ header p.lead {
 }
 
 .card:hover {
-    box-shadow: 0 8px 25px rgba(42, 82, 152, 0.2);
+    box-shadow: 0 8px 25px rgba(193, 255, 53, 0.2);
     transform: translateY(-3px);
 }
 
@@ -59,29 +59,29 @@ header p.lead {
 }
 
 .card-header.bg-primary {
-    background: linear-gradient(135deg, #2a5298, #172b4d) !important;
+    background: linear-gradient(135deg, #94c500, #7da000) !important;
 }
 
 .card-header.bg-success {
-    background: linear-gradient(135deg, #172b4d, #0f2035) !important;
+    background: linear-gradient(135deg, #7da000, #516800) !important;
 }
 
 .card-header h3 {
     font-weight: 600;
     font-size: 1.5rem;
     margin: 0;
-    color: white;
+    color: #121212;
 }
 
 .card-body {
     padding: 1.5rem;
-    background-color: #161b26;
+    background-color: #1a1a1a;
 }
 
 /* Estilos para los contenedores de equipos */
 .team-container {
-    background-color: #1d2433 !important;
-    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    background-color: #1e1e1e !important;
+    border: 1px solid rgba(193, 255, 53, 0.1) !important;
     border-radius: 10px;
     padding: 1.5rem;
     transition: all 0.3s ease;
@@ -90,23 +90,23 @@ header p.lead {
 }
 
 .team-container:hover {
-    box-shadow: 0 8px 20px rgba(42, 82, 152, 0.3);
+    box-shadow: 0 8px 20px rgba(193, 255, 53, 0.3);
     transform: translateY(-5px);
-    border: 1px solid rgba(42, 82, 152, 0.3) !important;
+    border: 1px solid rgba(193, 255, 53, 0.3) !important;
 }
 
 .team-container h4 {
-    color: #3a6fc6;
+    color: #c1ff35;
     font-weight: 600;
     margin-bottom: 1.5rem;
     text-align: center;
-    text-shadow: 0 0 10px rgba(42, 82, 152, 0.2);
+    text-shadow: 0 0 10px rgba(193, 255, 53, 0.2);
 }
 
 /* Estilos para los inputs */
 .form-control, .form-select {
-    background-color: #1a2235;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: #252525;
+    border: 1px solid rgba(193, 255, 53, 0.1);
     color: #e0e0e0;
     border-radius: 8px;
     padding: 0.7rem 1rem;
@@ -114,9 +114,9 @@ header p.lead {
 }
 
 .form-control:focus, .form-select:focus {
-    background-color: #1f293f;
-    border-color: #3a6fc6;
-    box-shadow: 0 0 0 0.25rem rgba(42, 82, 152, 0.25);
+    background-color: #303030;
+    border-color: #c1ff35;
+    box-shadow: 0 0 0 0.25rem rgba(193, 255, 53, 0.25);
     color: #ffffff;
 }
 
@@ -128,21 +128,21 @@ header p.lead {
 
 /* Terminal de consola */
 .terminal {
-    background-color: #0c1016;
+    background-color: #0c0c0c;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(193, 255, 53, 0.05);
     margin-bottom: 2rem;
 }
 
 .terminal-header {
-    background-color: #141c2b;
+    background-color: #1a1a1a;
     padding: 12px 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(193, 255, 53, 0.05);
 }
 
 .terminal-title {
@@ -196,11 +196,11 @@ header p.lead {
 }
 
 .terminal-body::-webkit-scrollbar-track {
-    background: #141c2b;
+    background: #1a1a1a;
 }
 
 .terminal-body::-webkit-scrollbar-thumb {
-    background: #2a5298;
+    background: #94c500;
     border-radius: 4px;
 }
 
@@ -219,27 +219,27 @@ header p.lead {
 }
 
 .terminal-body .highlight {
-    color: #57b8ff;
+    color: #c1ff35;
     font-weight: 500;
 }
 
 .terminal-body .warning {
-    color: #d4a017;
+    color: #ffd600;
     font-weight: 500;
 }
 
 .terminal-body .error {
-    color: #d93025;
+    color: #ff4545;
     font-weight: 500;
 }
 
 .terminal-body .info {
-    color: #3a6fc6;
+    color: #aaff00;
     font-weight: 500;
 }
 
 .terminal-body .result {
-    color: #2a5298;
+    color: #94c500;
     font-weight: bold;
 }
 
@@ -265,22 +265,24 @@ header p.lead {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #2a5298, #172b4d);
+    background: linear-gradient(135deg, #94c500, #7da000);
     border: none;
+    color: #121212;
 }
 
 .btn-primary:hover, .btn-primary:focus {
-    background: linear-gradient(135deg, #3a6fc6, #2a5298);
+    background: linear-gradient(135deg, #b5f01c, #94c500);
     border: none;
+    color: #121212;
 }
 
 .btn-secondary {
-    background: linear-gradient(135deg, #2d3748, #1a2235);
+    background: linear-gradient(135deg, #3a3a3a, #252525);
     border: none;
 }
 
 .btn-secondary:hover, .btn-secondary:focus {
-    background: linear-gradient(135deg, #3a4d6b, #2d3748);
+    background: linear-gradient(135deg, #4a4a4a, #3a3a3a);
     border: none;
 }
 
@@ -295,13 +297,13 @@ header p.lead {
 }
 
 .btn-info {
-    background: linear-gradient(135deg, #213761, #0f2035);
+    background: linear-gradient(135deg, #516800, #3e5000);
     border: none;
     color: white;
 }
 
 .btn-info:hover, .btn-info:focus {
-    background: linear-gradient(135deg, #2a5298, #213761);
+    background: linear-gradient(135deg, #7da000, #516800);
     border: none;
     color: white;
 }
@@ -326,35 +328,35 @@ header p.lead {
 #win-probability {
     font-size: 2.5rem;
     font-weight: bold;
-    background: linear-gradient(135deg, #2a5298, #3a6fc6);
+    background: linear-gradient(135deg, #94c500, #b5f01c);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    text-shadow: 0 0 10px rgba(42, 82, 152, 0.3);
+    text-shadow: 0 0 10px rgba(193, 255, 53, 0.3);
 }
 
 #favorite-team {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #3a6fc6;
-    text-shadow: 0 0 10px rgba(42, 82, 152, 0.2);
+    color: #c1ff35;
+    text-shadow: 0 0 10px rgba(193, 255, 53, 0.2);
     margin-bottom: 1rem;
 }
 
 /* Tarjetas de resultado */
 #prediction-results .card {
     height: 100%;
-    background-color: #1a2235;
+    background-color: #1e1e1e;
     transition: all 0.3s ease;
 }
 
 #prediction-results .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(42, 82, 152, 0.3);
+    box-shadow: 0 10px 20px rgba(193, 255, 53, 0.3);
 }
 
 #prediction-results .card-body {
-    background-color: #1a2235;
+    background-color: #1e1e1e;
     padding: 2rem;
 }
 
@@ -374,7 +376,7 @@ header p.lead {
     display: inline-block;
     width: 8px;
     height: 18px;
-    background-color: #2a5298;
+    background-color: #c1ff35;
     margin-left: 2px;
     animation: blink 1s infinite;
 }
@@ -388,7 +390,7 @@ header p.lead {
 }
 
 #ai-explanation h3 {
-    color: #3a6fc6;
+    color: #c1ff35;
     margin-top: 1.5rem;
     margin-bottom: 1rem;
     font-weight: 600;
@@ -404,7 +406,7 @@ header p.lead {
 }
 
 #ai-explanation strong {
-    color: #d4a017;
+    color: #ffd600;
     font-weight: 600;
 }
 
@@ -416,7 +418,7 @@ canvas {
 
 /* Modal */
 .modal-content {
-    background-color: #161b26;
+    background-color: #1a1a1a;
     border: none;
     border-radius: 12px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
@@ -428,23 +430,23 @@ canvas {
 }
 
 .modal-header.bg-info {
-    background: linear-gradient(135deg, #2a5298, #172b4d) !important;
+    background: linear-gradient(135deg, #94c500, #7da000) !important;
 }
 
 .modal-header h5 {
     font-weight: 600;
-    color: white;
+    color: #121212;
 }
 
 .modal-body {
     padding: 1.5rem;
-    background-color: #161b26;
+    background-color: #1a1a1a;
 }
 
 .modal-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1.25rem 1.5rem;
-    background-color: #161b26;
+    background-color: #1a1a1a;
 }
 
 .btn-close {
@@ -453,18 +455,18 @@ canvas {
 
 /* Spinner */
 .spinner-border.text-primary {
-    color: #2a5298 !important;
+    color: #c1ff35 !important;
     width: 3rem;
     height: 3rem;
 }
 
 /* Footer */
 footer {
-    background-color: #0f1521 !important;
+    background-color: #0a0a0a !important;
     color: #a0a0a0;
     padding: 2rem 0;
     margin-top: 3rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(193, 255, 53, 0.05);
 }
 
 footer p {
@@ -504,7 +506,7 @@ body.modal-open {
 
 /* Si quieres también que se vea debajo, baja la opacidad del backdrop */
 .modal-backdrop {
-    background-color: rgba(5, 10, 20, 0.8) !important;
+    background-color: rgba(5, 10, 5, 0.8) !important;
 }
 
 /* Personalización de scrollbar global */
@@ -513,28 +515,28 @@ body.modal-open {
 }
 
 ::-webkit-scrollbar-track {
-    background: #141c2b;
+    background: #1a1a1a;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: #2a5298;
+    background: #94c500;
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #3a6fc6;
+    background: #c1ff35;
 }
 
 /* Efectos para input activo */
 .form-control:focus + .form-label,
 .form-control:valid + .form-label {
-    color: #3a6fc6;
+    color: #c1ff35;
 }
 
 /* Efectos hover para los elementos interactivos */
 .stats-input:focus {
-    border-color: #2a5298;
-    box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+    border-color: #94c500;
+    box-shadow: 0 0 0 3px rgba(193, 255, 53, 0.2);
 }
 
 /* Efecto de brillos sutiles en el fondo */
@@ -548,4 +550,49 @@ body.modal-open {
     100% {
         background-position: 0% 50%;
     }
+}
+/* Actualización del texto text-muted */
+.text-muted {
+    color: #ffffff !important; /* Cambio a blanco para mejor visibilidad */
+    font-weight: 500; /* Un poco más de peso para mejor legibilidad */
+}
+
+/* Actualización del footer */
+footer {
+    background-color: #0a0a0a !important; /* Fondo más oscuro */
+    color: #ffffff; /* Texto blanco */
+    padding: 2rem 0;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(193, 255, 53, 0.05);
+}
+
+footer p {
+    margin-bottom: 0;
+    color: #ffffff; /* Asegurando que todos los párrafos del footer sean blancos */
+}
+
+.modal-dialog-scrollable .modal-body {
+        max-height: 75vh;
+        overflow-y: auto;
+      }
+
+.alert-danger {
+    background-color: #3a1616 !important; /* Fondo rojo oscuro */
+    color: #ffffff !important; /* Texto blanco */
+    border: 1px solid #5c2525 !important; /* Borde más oscuro */
+    border-radius: 8px;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.alert-danger strong {
+    color: #ff6b6b !important; /* Título en rojo claro para destacar */
+    font-size: 1.1rem;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.alert-danger p {
+    color: #ffffff !important; /* Asegurando que el texto del mensaje sea blanco */
+    margin-bottom: 0;
 }
