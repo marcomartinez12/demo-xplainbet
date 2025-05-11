@@ -1,0 +1,551 @@
+/* Estilos generales */
+body {
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #0c0e14;
+    color: #e0e0e0;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(10, 25, 47, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(15, 32, 58, 0.1) 0%, transparent 50%);
+    background-attachment: fixed;
+}
+
+.container {
+    max-width: 1200px;
+}
+
+/* Estilos para el header */
+header {
+    margin-top: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+header h1 {
+    font-weight: 800;
+    color: #2a5298;
+    text-shadow: 0 0 10px rgba(42, 82, 152, 0.3);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+header h1:hover {
+    transform: translateY(-3px);
+    text-shadow: 0 0 15px rgba(42, 82, 152, 0.5);
+}
+
+header p.lead {
+    color: #a0a0a0;
+    font-weight: 300;
+}
+
+/* Estilos para las tarjetas */
+.card {
+    background-color: #161b26;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    box-shadow: 0 8px 25px rgba(42, 82, 152, 0.2);
+    transform: translateY(-3px);
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-header.bg-primary {
+    background: linear-gradient(135deg, #2a5298, #172b4d) !important;
+}
+
+.card-header.bg-success {
+    background: linear-gradient(135deg, #172b4d, #0f2035) !important;
+}
+
+.card-header h3 {
+    font-weight: 600;
+    font-size: 1.5rem;
+    margin: 0;
+    color: white;
+}
+
+.card-body {
+    padding: 1.5rem;
+    background-color: #161b26;
+}
+
+/* Estilos para los contenedores de equipos */
+.team-container {
+    background-color: #1d2433 !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    height: 100%;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.team-container:hover {
+    box-shadow: 0 8px 20px rgba(42, 82, 152, 0.3);
+    transform: translateY(-5px);
+    border: 1px solid rgba(42, 82, 152, 0.3) !important;
+}
+
+.team-container h4 {
+    color: #3a6fc6;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-shadow: 0 0 10px rgba(42, 82, 152, 0.2);
+}
+
+/* Estilos para los inputs */
+.form-control, .form-select {
+    background-color: #1a2235;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #1f293f;
+    border-color: #3a6fc6;
+    box-shadow: 0 0 0 0.25rem rgba(42, 82, 152, 0.25);
+    color: #ffffff;
+}
+
+.form-label {
+    color: #a0a0a0;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+/* Terminal de consola */
+.terminal {
+    background-color: #0c1016;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    margin-bottom: 2rem;
+}
+
+.terminal-header {
+    background-color: #141c2b;
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.terminal-title {
+    color: #f0f0f0;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.terminal-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.terminal-control {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    transition: all 0.2s ease;
+}
+
+.terminal-control:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+}
+
+.terminal-control.close {
+    background-color: #ff5f56;
+}
+
+.terminal-control.minimize {
+    background-color: #ffbd2e;
+}
+
+.terminal-control.maximize {
+    background-color: #27c93f;
+}
+
+.terminal-body {
+    padding: 20px;
+    color: #f0f0f0;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    min-height: 200px;
+    max-height: 400px;
+    overflow-y: auto;
+    line-height: 1.6;
+}
+
+.terminal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-body::-webkit-scrollbar-track {
+    background: #141c2b;
+}
+
+.terminal-body::-webkit-scrollbar-thumb {
+    background: #2a5298;
+    border-radius: 4px;
+}
+
+.terminal-body .line {
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.terminal-body .highlight {
+    color: #57b8ff;
+    font-weight: 500;
+}
+
+.terminal-body .warning {
+    color: #d4a017;
+    font-weight: 500;
+}
+
+.terminal-body .error {
+    color: #d93025;
+    font-weight: 500;
+}
+
+.terminal-body .info {
+    color: #3a6fc6;
+    font-weight: 500;
+}
+
+.terminal-body .result {
+    color: #2a5298;
+    font-weight: bold;
+}
+
+/* Botones */
+.btn {
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(0, 0, 0, 0.2);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2a5298, #172b4d);
+    border: none;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background: linear-gradient(135deg, #3a6fc6, #2a5298);
+    border: none;
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #2d3748, #1a2235);
+    border: none;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+    background: linear-gradient(135deg, #3a4d6b, #2d3748);
+    border: none;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #841c1c, #5d1515);
+    border: none;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    background: linear-gradient(135deg, #a52424, #841c1c);
+    border: none;
+}
+
+.btn-info {
+    background: linear-gradient(135deg, #213761, #0f2035);
+    border: none;
+    color: white;
+}
+
+.btn-info:hover, .btn-info:focus {
+    background: linear-gradient(135deg, #2a5298, #213761);
+    border: none;
+    color: white;
+}
+
+.btn-lg {
+    padding: 0.7rem 2rem;
+    font-size: 1rem;
+}
+
+/* Estilos para los resultados */
+#prediction-results {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+#prediction-results.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#win-probability {
+    font-size: 2.5rem;
+    font-weight: bold;
+    background: linear-gradient(135deg, #2a5298, #3a6fc6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 0 10px rgba(42, 82, 152, 0.3);
+}
+
+#favorite-team {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #3a6fc6;
+    text-shadow: 0 0 10px rgba(42, 82, 152, 0.2);
+    margin-bottom: 1rem;
+}
+
+/* Tarjetas de resultado */
+#prediction-results .card {
+    height: 100%;
+    background-color: #1a2235;
+    transition: all 0.3s ease;
+}
+
+#prediction-results .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(42, 82, 152, 0.3);
+}
+
+#prediction-results .card-body {
+    background-color: #1a2235;
+    padding: 2rem;
+}
+
+#prediction-results .card h4 {
+    color: #a0a0a0;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+}
+
+/* Animaciones para el terminal */
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 18px;
+    background-color: #2a5298;
+    margin-left: 2px;
+    animation: blink 1s infinite;
+}
+
+/* Estilos para la explicación de IA */
+#ai-explanation {
+    line-height: 1.7;
+    text-align: justify;
+    color: #e0e0e0;
+    padding: 1rem;
+}
+
+#ai-explanation h3 {
+    color: #3a6fc6;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+#ai-explanation p {
+    margin-bottom: 1rem;
+}
+
+#ai-explanation ul, #ai-explanation ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+#ai-explanation strong {
+    color: #d4a017;
+    font-weight: 600;
+}
+
+/* Estilos para la gráfica */
+canvas {
+    max-height: 300px;
+    margin-top: 1rem;
+}
+
+/* Modal */
+.modal-content {
+    background-color: #161b26;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-header.bg-info {
+    background: linear-gradient(135deg, #2a5298, #172b4d) !important;
+}
+
+.modal-header h5 {
+    font-weight: 600;
+    color: white;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    background-color: #161b26;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.25rem 1.5rem;
+    background-color: #161b26;
+}
+
+.btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+/* Spinner */
+.spinner-border.text-primary {
+    color: #2a5298 !important;
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Footer */
+footer {
+    background-color: #0f1521 !important;
+    color: #a0a0a0;
+    padding: 2rem 0;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+footer p {
+    margin-bottom: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .team-container {
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-lg {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+
+    header h1 {
+        font-size: 2rem;
+    }
+
+    #win-probability {
+        font-size: 2rem;
+    }
+
+    #favorite-team {
+        font-size: 1.5rem;
+    }
+}
+
+/* Anula el overflow:hidden en body cuando haya un modal abierto */
+body.modal-open {
+    overflow: visible !important;
+    padding-right: 0 !important;
+}
+
+/* Si quieres también que se vea debajo, baja la opacidad del backdrop */
+.modal-backdrop {
+    background-color: rgba(5, 10, 20, 0.8) !important;
+}
+
+/* Personalización de scrollbar global */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #141c2b;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2a5298;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #3a6fc6;
+}
+
+/* Efectos para input activo */
+.form-control:focus + .form-label,
+.form-control:valid + .form-label {
+    color: #3a6fc6;
+}
+
+/* Efectos hover para los elementos interactivos */
+.stats-input:focus {
+    border-color: #2a5298;
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
+}
+
+/* Efecto de brillos sutiles en el fondo */
+@keyframes gradientMove {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%; 
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
