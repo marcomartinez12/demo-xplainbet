@@ -17,7 +17,7 @@ fonttools
 idna
 kiwisolver
 packaging
-pillow=
+pillow
 pyparsing
 python-dateutil
 six
