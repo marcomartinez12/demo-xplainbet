@@ -596,3 +596,106 @@ footer p {
     color: #ffffff !important; /* Asegurando que el texto del mensaje sea blanco */
     margin-bottom: 0;
 }
+
+/* Inspiración OneFootball, pero original */
+.sim-container {
+    display: flex;
+    background: #181c24;
+    border-radius: 12px;
+    overflow: hidden;
+    min-height: 420px;
+  }
+  .sim-stats {
+    width: 220px;
+    background: #23272f;
+    color: #fff;
+    padding: 18px 12px;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .sim-stats-left { border-right: 2px solid #222; }
+  .sim-stats-right { border-left: 2px solid #222; }
+  .sim-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  .sim-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #222;
+    padding: 14px 24px;
+    font-size: 22px;
+    color: #fff;
+  }
+  .sim-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .sim-team-left { color: #2196f3; font-weight: bold; }
+  .sim-team-right { color: #e53935; font-weight: bold; }
+  .sim-goals-left { color: #43a047; font-size: 28px; }
+  .sim-goals-right { color: #e53935; font-size: 28px; }
+  .sim-dash { color: #fff; font-size: 28px; }
+  .sim-controls button {
+    background: #23272f;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 6px;
+    margin-left: 6px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sim-controls button:hover { background: #333; }
+  .sim-timeline {
+    flex: 1;
+    background: #23272f;
+    padding: 18px 24px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .sim-event {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 16px;
+    background: #20232a;
+    color: #fff;
+    box-shadow: 0 2px 8px #0002;
+  }
+  .sim-event.left { border-left: 4px solid #2196f3; }
+  .sim-event.right { border-right: 4px solid #e53935; }
+  .sim-event-goal { background: #1b5e20; color: #fff; }
+  .sim-event-foul { background: #ff9800; color: #fff; }
+  .sim-event-corner { background: #1976d2; color: #fff; }
+  .sim-event-yellow { background: #ffd600; color: #222; }
+  .sim-event-red { background: #d32f2f; color: #fff; }
+  .sim-event-min {
+    font-size: 14px;
+    font-weight: bold;
+    background: #111;
+    color: #fff;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sim-event-icon {
+    font-size: 20px;
+    margin-right: 6px;
+  }
+  .sim-event-desc {
+    flex: 1;
+  }

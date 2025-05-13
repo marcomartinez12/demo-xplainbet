@@ -221,40 +221,20 @@ async function calculatePrediction() {
     // Comparación final
     await typeTerminalText(terminal, '\n$ Calculando probabilidades de resultados con Poisson...');
     await new Promise(resolve => setTimeout(resolve, calculationDelay));
-    
-    // Matriz de probabilidades para diferentes marcadores (hasta 5 goles)
+
+    // Agrega esta línea para definir el máximo de goles a considerar
     const maxGoals = 5;
+
+    // Calcular probabilidades completas
     let resultMatrix = [];
     let team1WinProb = 0;
     let team2WinProb = 0;
     let drawProb = 0;
-    
-    await typeTerminalText(terminal, `<span class="info">Calculando matriz de probabilidades de marcadores:</span>`);
-    
-    // Mostrar algunos ejemplos de probabilidades de marcadores específicos
-    for (let i = 0; i <= 3; i++) {
-        for (let j = 0; j <= 3; j++) {
-            const prob = poissonProbability(lambda1, i) * poissonProbability(lambda2, j);
-            const percentage = (prob * 100).toFixed(2);
-            
-            if (i === j && i <= 2) {
-                await typeTerminalText(terminal, `<span class="info">Probabilidad de ${i}-${j}:</span> <span class="result">${percentage}%</span>`);
-            }
-            
-            if ((i === 1 && j === 0) || (i === 0 && j === 1) || (i === 2 && j === 1) || (i === 1 && j === 2)) {
-                await typeTerminalText(terminal, `<span class="info">Probabilidad de ${i}-${j}:</span> <span class="result">${percentage}%</span>`);
-            }
-        }
-    }
-    
-    // Calcular probabilidades completas
     for (let i = 0; i <= maxGoals; i++) {
         resultMatrix[i] = [];
         for (let j = 0; j <= maxGoals; j++) {
             const prob = poissonProbability(lambda1, i) * poissonProbability(lambda2, j);
             resultMatrix[i][j] = prob;
-            
-            // Sumar a las probabilidades totales
             if (i > j) team1WinProb += prob;
             else if (i < j) team2WinProb += prob;
             else drawProb += prob;
@@ -315,7 +295,7 @@ async function calculatePrediction() {
         drawProbability: drawProb.toFixed(2),
         favoriteTeam: favoriteTeam,
         winProbability: winProbability,
-        resultMatrix: resultMatrix.slice(0, 4).map(row => row.slice(0, 4)) // Guardar matriz 4x4 de resultados
+        resultMatrix: resultMatrix.slice(0, maxGoals + 1).map(row => row.slice(0, maxGoals + 1)) // Guardar matriz (ahora 6x6) de resultados
     };
     
     // Mostrar resultados en la interfaz
@@ -630,3 +610,369 @@ async function showAIExplanation() {
         explanationBtn.disabled = false;
     }
 }
+
+
+// Función para simular el partido con estadísticas
+async function simularPartido() {
+    if (!currentResults) {
+        alert("Primero debes realizar una predicción antes de simular un partido");
+        return;
+    }
+    
+    // Crear el HTML del modal si no existe
+    if (!document.getElementById('simulacion-modal')) {
+        const modalHTML = `
+        <div class="modal fade" id="simulacion-modal" tabindex="-1" aria-labelledby="simulacionModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="simulacionModalLabel">Simulación de Partido</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="simulacion-carga" class="text-center mb-4">
+                            <h4>Simulando partido...</h4>
+                            <div class="progress mt-3 mb-3">
+                                <div id="barra-progreso" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
+                                    role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <p id="texto-carga">Preparando simulación...</p>
+                        </div>
+                        <div id="simulacion-resultado" style="display:none;">
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card bg-dark text-white">
+                                        <div class="card-body text-center">
+                                            <div class="row align-items-center">
+                                                <div class="col-4 text-end">
+                                                    <h3 id="equipo-local"></h3>
+                                                </div>
+                                                <div class="col-4">
+                                                    <div class="display-4 fw-bold">
+                                                        <span id="goles-local"></span> - <span id="goles-visitante"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-4 text-start">
+                                                    <h3 id="equipo-visitante"></h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <h4 class="text-center mb-3">Estadísticas del Partido</h4>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th class="text-end" width="40%">Local</th>
+                                                    <th class="text-center" width="20%">Estadística</th>
+                                                    <th class="text-start" width="40%">Visitante</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="tabla-estadisticas">
+                                                <!-- Las estadísticas se llenarán dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h4 class="text-center mb-3">Momentos Clave</h4>
+                                    <div class="timeline" id="momentos-partido">
+                                        <!-- Los momentos se llenarán dinámicamente -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+        
+        // Agregar el modal al DOM
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+    }
+    
+    // Obtener referencias
+    const modalElement = document.getElementById('simulacion-modal');
+    const barraProgreso = document.getElementById('barra-progreso');
+    const textoCarga = document.getElementById('texto-carga');
+    const simulacionCarga = document.getElementById('simulacion-carga');
+    const simulacionResultado = document.getElementById('simulacion-resultado');
+    
+    // Reiniciar elementos
+    barraProgreso.style.width = '0%';
+    barraProgreso.setAttribute('aria-valuenow', '0');
+    simulacionCarga.style.display = 'block';
+    simulacionResultado.style.display = 'none';
+    
+    // Mostrar modal (usando el constructor directamente)
+    const simulacionModal = new bootstrap.Modal(modalElement);
+    simulacionModal.show();
+    
+    // Simular progreso
+    for (let i = 0; i <= 100; i += 5) {
+        barraProgreso.style.width = i + '%';
+        barraProgreso.setAttribute('aria-valuenow', i);
+        
+        if (i === 25) textoCarga.textContent = "Calculando estadísticas...";
+        if (i === 50) textoCarga.textContent = "Simulando jugadas...";
+        if (i === 75) textoCarga.textContent = "Finalizando partido...";
+        if (i === 100) textoCarga.textContent = "¡Simulación completada!";
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    // Esperar un momento antes de mostrar resultados
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Ocultar carga y mostrar resultados
+    simulacionCarga.style.display = 'none';
+    simulacionResultado.style.display = 'block';
+    
+    // Obtener datos de los equipos
+    const team1 = currentResults.team1.name;
+    const team2 = currentResults.team2.name;
+    const lambda1 = currentResults.team1.lambda;
+    const lambda2 = currentResults.team2.lambda;
+    
+    // Simular goles (usando distribución de Poisson)
+    const goles1 = simularGoles(lambda1);
+    const goles2 = simularGoles(lambda2);
+    
+    // Mostrar resultado
+    document.getElementById('equipo-local').textContent = team1;
+    document.getElementById('equipo-visitante').textContent = team2;
+    document.getElementById('goles-local').textContent = goles1;
+    document.getElementById('goles-visitante').textContent = goles2;
+    
+    // Generar estadísticas del partido
+    const estadisticas = generarEstadisticasPartido(currentResults.team1.stats, currentResults.team2.stats);
+    
+    // Mostrar estadísticas
+    const tablaEstadisticas = document.getElementById('tabla-estadisticas');
+    tablaEstadisticas.innerHTML = '';
+    
+    for (const [clave, valores] of Object.entries(estadisticas)) {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td class="text-end">${valores.local}</td>
+            <td class="text-center">${valores.nombre}</td>
+            <td class="text-start">${valores.visitante}</td>
+        `;
+        tablaEstadisticas.appendChild(fila);
+    }
+    
+    // Generar momentos clave del partido
+    const momentos = generarMomentosPartido(team1, team2, goles1, goles2);
+    
+    // Mostrar momentos
+    const momentosPartido = document.getElementById('momentos-partido');
+    momentosPartido.innerHTML = '';
+    
+    momentos.forEach(momento => {
+        const elementoMomento = document.createElement('div');
+        elementoMomento.className = 'momento-partido';
+        elementoMomento.innerHTML = `
+            <div class="minuto">${momento.minuto}'</div>
+            <div class="contenido">
+                <strong>${momento.equipo}:</strong> ${momento.descripcion}
+                ${momento.tipo === 'gol' ? '<span class="badge bg-danger">GOL</span>' : ''}
+            </div>
+        `;
+        momentosPartido.appendChild(elementoMomento);
+    });
+}
+
+// Función para simular goles usando Poisson
+function simularGoles(lambda) {
+    let L = Math.exp(-lambda);
+    let p = 1.0;
+    let k = 0;
+    
+    do {
+        k++;
+        p *= Math.random();
+    } while (p > L);
+    
+    return k - 1;
+}
+
+// Función para generar estadísticas aleatorias del partido
+function generarEstadisticasPartido(stats1, stats2) {
+    // Convertir posesión a números que sumen 100
+    const posesionTotal = 100;
+    const posesionLocal = Math.round(stats1.possession);
+    const posesionVisitante = posesionTotal - posesionLocal;
+    
+    // Generar estadísticas basadas en las medias de los equipos
+    return {
+        posesion: {
+            nombre: "Posesión",
+            local: posesionLocal + "%",
+            visitante: posesionVisitante + "%"
+        },
+        tiros: {
+            nombre: "Tiros a puerta",
+            local: Math.round(stats1.shotsOnTarget * (Math.random() * 0.4 + 0.8)),
+            visitante: Math.round(stats2.shotsOnTarget * (Math.random() * 0.4 + 0.8))
+        },
+        pases: {
+            nombre: "Precisión de pases",
+            local: Math.round(stats1.passingAccuracy) + "%",
+            visitante: Math.round(stats2.passingAccuracy) + "%"
+        },
+        faltas: {
+            nombre: "Faltas",
+            local: Math.round(stats1.fouls * (Math.random() * 0.4 + 0.8)),
+            visitante: Math.round(stats2.fouls * (Math.random() * 0.4 + 0.8))
+        },
+        corners: {
+            nombre: "Córners",
+            local: Math.round(stats1.corners * (Math.random() * 0.4 + 0.8)),
+            visitante: Math.round(stats2.corners * (Math.random() * 0.4 + 0.8))
+        },
+        tarjetas: {
+            nombre: "Tarjetas amarillas",
+            local: Math.round(stats1.yellowCards * (Math.random() * 0.6 + 0.7)),
+            visitante: Math.round(stats2.yellowCards * (Math.random() * 0.6 + 0.7))
+        }
+    };
+}
+
+// Función para generar momentos clave del partido
+function generarMomentosPartido(equipo1, equipo2, goles1, goles2) {
+    const momentos = [];
+    const totalMomentos = goles1 + goles2 + Math.floor(Math.random() * 6) + 3; // Goles + algunos momentos adicionales
+    
+    // Generar minutos para los goles
+    const minutosGoles1 = generarMinutosAleatorios(goles1);
+    const minutosGoles2 = generarMinutosAleatorios(goles2);
+    
+    // Agregar goles del equipo 1
+    minutosGoles1.forEach(minuto => {
+        momentos.push({
+            minuto: minuto,
+            equipo: equipo1,
+            descripcion: `¡GOL! ${generarDescripcionGol()}`,
+            tipo: 'gol'
+        });
+    });
+    
+    // Agregar goles del equipo 2
+    minutosGoles2.forEach(minuto => {
+        momentos.push({
+            minuto: minuto,
+            equipo: equipo2,
+            descripcion: `¡GOL! ${generarDescripcionGol()}`,
+            tipo: 'gol'
+        });
+    });
+    
+    // Agregar otros momentos (tiros, faltas, etc.)
+    const momentosAdicionales = totalMomentos - goles1 - goles2;
+    const tiposMomentos = ['tiro', 'falta', 'corner', 'tarjeta'];
+    
+    for (let i = 0; i < momentosAdicionales; i++) {
+        const minuto = Math.floor(Math.random() * 90) + 1;
+        const equipo = Math.random() < 0.5 ? equipo1 : equipo2;
+        const tipoMomento = tiposMomentos[Math.floor(Math.random() * tiposMomentos.length)];
+        
+        let descripcion = '';
+        switch (tipoMomento) {
+            case 'tiro':
+                descripcion = `${generarDescripcionTiro()}`;
+                break;
+            case 'falta':
+                descripcion = `${generarDescripcionFalta()}`;
+                break;
+            case 'corner':
+                descripcion = `Córner a favor`;
+                break;
+            case 'tarjeta':
+                descripcion = `Tarjeta amarilla`;
+                break;
+        }
+        
+        momentos.push({
+            minuto: minuto,
+            equipo: equipo,
+            descripcion: descripcion,
+            tipo: tipoMomento
+        });
+    }
+    
+    // Ordenar por minuto
+    momentos.sort((a, b) => a.minuto - b.minuto);
+    
+    return momentos;
+}
+
+// Función para generar minutos aleatorios para los goles
+function generarMinutosAleatorios(cantidad) {
+    const minutos = [];
+    for (let i = 0; i < cantidad; i++) {
+        // Más probabilidad de goles en la segunda parte
+        let minuto;
+        if (Math.random() < 0.6) {
+            minuto = Math.floor(Math.random() * 45) + 46; // 46-90
+        } else {
+            minuto = Math.floor(Math.random() * 45) + 1; // 1-45
+        }
+        minutos.push(minuto);
+    }
+    return minutos;
+}
+
+// Funciones para generar descripciones aleatorias
+function generarDescripcionGol() {
+    const descripciones = [
+        `Remate potente desde fuera del área`,
+        `Cabezazo tras un centro preciso`,
+        `Disparo cruzado que entra por la escuadra`,
+        `Penalti bien ejecutado`,
+        `Contraataque letal`,
+        `Tras una gran jugada colectiva`,
+        `Aprovechando un error defensivo`,
+        `De tiro libre directo`
+    ];
+    return descripciones[Math.floor(Math.random() * descripciones.length)];
+}
+
+function generarDescripcionTiro() {
+    const descripciones = [
+        `Disparo que se va por encima del larguero`,
+        `Tiro que detiene el portero`,
+        `Remate que se estrella en el poste`,
+        `Intento desde lejos que sale desviado`,
+        `Buena parada del portero tras un disparo peligroso`
+    ];
+    return descripciones[Math.floor(Math.random() * descripciones.length)];
+}
+
+function generarDescripcionFalta() {
+    const descripciones = [
+        `Falta peligrosa cerca del área`,
+        `Entrada dura que el árbitro sanciona`,
+        `Infracción por mano`,
+        `Falta táctica para cortar un avance`
+    ];
+    return descripciones[Math.floor(Math.random() * descripciones.length)];
+}
+
+// Asociar función al botón de simular
+document.addEventListener('DOMContentLoaded', function() {
+    const simularBtn = document.getElementById('simular-btn');
+    if (simularBtn) {
+        simularBtn.addEventListener('click', simularPartido);
+    } else {
+        console.error("No se encontró el botón de simulación");
+    }
+});

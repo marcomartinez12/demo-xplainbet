@@ -102,10 +102,11 @@ Por favor, proporciona una explicación detallada y personalizada de por qué {f
 
         # Lista de modelos a probar, en orden de preferencia
         fallback_models = [
-            "deepseek/deepseek-chat-v3-0324:free",
-            "mistralai/mistral-7b-instruct-v0.1:free",
-            "openai/gpt-3.5-turbo:free"
+        "meta-llama/llama-4-maverick:free",
+        "moonshotai/kimi-vl-a3b-thinking:free",
+        "mistralai/mistral-small-3:free"
         ]
+
         
         # Intentar con cada modelo hasta que uno funcione
         explanation = None
@@ -118,7 +119,7 @@ Por favor, proporciona una explicación detallada y personalizada de por qué {f
                         {"role": "user", "content": prompt}
                     ],
                     "temperature": 0.7,
-                    "max_tokens": 850
+                    "max_tokens": 1000
                 }
 
                 app.logger.info(f"Enviando solicitud a OpenRouter con modelo {model}")
@@ -126,7 +127,7 @@ Por favor, proporciona una explicación detallada y personalizada de por qué {f
                     OPENROUTER_API_URL,
                     headers=headers,
                     json=payload,
-                    timeout=20
+                    timeout=None
                 )
 
                 if response.status_code == 200:
