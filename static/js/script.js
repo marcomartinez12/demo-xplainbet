@@ -624,73 +624,80 @@ async function simularPartido() {
         const modalHTML = `
         <div class="modal fade" id="simulacion-modal" tabindex="-1" aria-labelledby="simulacionModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header bg-success text-white">
-                        <h5 class="modal-title" id="simulacionModalLabel">Simulación de Partido</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="modal-content bg-dark text-white">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="simulacionModalLabel">
+                            <i class="fas fa-futbol me-2"></i>Simulación de Partido
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div id="simulacion-carga" class="text-center mb-4">
-                            <h4>Simulando partido...</h4>
-                            <div class="progress mt-3 mb-3">
+                    <div class="modal-body p-0">
+                        <div id="simulacion-carga" class="text-center p-4">
+                            <h4 class="mb-4">Simulando partido en vivo</h4>
+                            <div class="progress mb-4" style="height: 10px;">
                                 <div id="barra-progreso" class="progress-bar progress-bar-striped progress-bar-animated bg-success" 
                                     role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
-                            <p id="texto-carga">Preparando simulación...</p>
+                            <p id="texto-carga" class="text-muted">Preparando simulación...</p>
                         </div>
+                        
                         <div id="simulacion-resultado" style="display:none;">
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <div class="card bg-dark text-white">
-                                        <div class="card-body text-center">
-                                            <div class="row align-items-center">
-                                                <div class="col-4 text-end">
-                                                    <h3 id="equipo-local"></h3>
-                                                </div>
-                                                <div class="col-4">
-                                                    <div class="display-4 fw-bold">
-                                                        <span id="goles-local"></span> - <span id="goles-visitante"></span>
-                                                    </div>
-                                                </div>
-                                                <div class="col-4 text-start">
-                                                    <h3 id="equipo-visitante"></h3>
-                                                </div>
-                                            </div>
+                            <!-- Cabecera del partido -->
+                            <div class="p-3 border-bottom border-secondary">
+                                <div class="text-center mb-2">
+                                    <span class="text-muted">Partido simulado Hoy</span>
+                                    <span class="badge bg-success ms-2">Finalizado</span>
+                                </div>
+                                <div class="row align-items-center text-center">
+                                    <div class="col-4 text-end">
+                                        <h3 id="equipo-local" class="text-info"></h3>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="display-4 fw-bold">
+                                            <span id="goles-local" class="text-info"></span>
+                                            <span class="text-white">-</span>
+                                            <span id="goles-visitante" class="text-danger"></span>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                            <div class="row mb-4">
-                                <div class="col-12">
-                                    <h4 class="text-center mb-3">Estadísticas del Partido</h4>
-                                    <div class="table-responsive">
-                                        <table class="table table-bordered">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th class="text-end" width="40%">Local</th>
-                                                    <th class="text-center" width="20%">Estadística</th>
-                                                    <th class="text-start" width="40%">Visitante</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tabla-estadisticas">
-                                                <!-- Las estadísticas se llenarán dinámicamente -->
-                                            </tbody>
-                                        </table>
+                                    <div class="col-4 text-start">
+                                        <h3 id="equipo-visitante" class="text-danger"></h3>
                                     </div>
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <h4 class="text-center mb-3">Momentos Clave</h4>
-                                    <div class="timeline" id="momentos-partido">
+                            
+                            <!-- Contenedor principal -->
+                            <div class="row mx-0">
+                                <!-- Estadísticas equipo local -->
+                                <div class="col-md-4 p-3 border-end border-secondary">
+                                    <h6 class="text-center mb-3">Estadísticas</h6>
+                                    <div id="stats-local">
+                                        <!-- Se llenará dinámicamente -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Línea de tiempo -->
+                                <div class="col-md-4 p-3">
+                                    <h6 class="text-center mb-3">Momentos Clave</h6>
+                                    <div id="momentos-partido" class="timeline">
                                         <!-- Los momentos se llenarán dinámicamente -->
+                                    </div>
+                                </div>
+                                
+                                <!-- Estadísticas equipo visitante -->
+                                <div class="col-md-4 p-3 border-start border-secondary">
+                                    <h6 class="text-center mb-3">Estadísticas</h6>
+                                    <div id="stats-visitante">
+                                        <!-- Se llenará dinámicamente -->
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CERRAR</button>
+                        <button type="button" id="nueva-simulacion-btn" class="btn btn-success">
+                            <i class="fas fa-redo me-2"></i>NUEVA SIMULACIÓN
+                        </button>
                     </div>
                 </div>
             </div>
@@ -698,6 +705,86 @@ async function simularPartido() {
         
         // Agregar el modal al DOM
         document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Agregar estilos CSS para la línea de tiempo
+        const estilosTimeline = document.createElement('style');
+        estilosTimeline.textContent = `
+            .timeline {
+                position: relative;
+                max-height: 400px;
+                overflow-y: auto;
+                padding: 0 10px;
+            }
+            .timeline:before {
+                content: '';
+                position: absolute;
+                top: 0;
+                bottom: 0;
+                left: 50%;
+                width: 2px;
+                background: rgba(255,255,255,0.2);
+                transform: translateX(-50%);
+            }
+            .momento-partido {
+                position: relative;
+                margin-bottom: 15px;
+                padding-left: 40px;
+            }
+            .momento-partido .minuto {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 30px;
+                height: 30px;
+                background: #343a40;
+                border: 2px solid #6c757d;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 0.8rem;
+            }
+            .momento-partido .contenido {
+                background: #2c3136;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            .momento-partido.gol .minuto {
+                background: #dc3545;
+                border-color: #dc3545;
+            }
+            .momento-partido.gol .contenido {
+                background: rgba(220, 53, 69, 0.2);
+            }
+            .stat-item {
+                margin-bottom: 15px;
+            }
+            .stat-name {
+                font-size: 0.9rem;
+                color: #adb5bd;
+            }
+            .stat-value {
+                font-weight: bold;
+            }
+            .stat-bar {
+                height: 6px;
+                background: rgba(255,255,255,0.1);
+                margin-top: 5px;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            .stat-bar-fill {
+                height: 100%;
+                border-radius: 3px;
+            }
+        `;
+        document.head.appendChild(estilosTimeline);
+        
+        // Agregar evento para nueva simulación
+        document.getElementById('nueva-simulacion-btn').addEventListener('click', function() {
+            simularPartido();
+        });
     }
     
     // Obtener referencias
@@ -718,16 +805,25 @@ async function simularPartido() {
     simulacionModal.show();
     
     // Simular progreso
-    for (let i = 0; i <= 100; i += 5) {
+    const frases = [
+        "Analizando estadísticas de los equipos...",
+        "Calculando probabilidades de gol...",
+        "Simulando jugadas clave...",
+        "Generando eventos del partido...",
+        "Aplicando factores aleatorios...",
+        "Calculando resultado final..."
+    ];
+    
+    for (let i = 0; i <= 100; i += 4) {
         barraProgreso.style.width = i + '%';
         barraProgreso.setAttribute('aria-valuenow', i);
         
-        if (i === 25) textoCarga.textContent = "Calculando estadísticas...";
-        if (i === 50) textoCarga.textContent = "Simulando jugadas...";
-        if (i === 75) textoCarga.textContent = "Finalizando partido...";
+        if (i % 20 === 0 && i > 0 && i < 100) {
+            textoCarga.textContent = frases[i/20];
+        }
         if (i === 100) textoCarga.textContent = "¡Simulación completada!";
         
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 80));
     }
     
     // Esperar un momento antes de mostrar resultados
@@ -756,18 +852,42 @@ async function simularPartido() {
     // Generar estadísticas del partido
     const estadisticas = generarEstadisticasPartido(currentResults.team1.stats, currentResults.team2.stats);
     
-    // Mostrar estadísticas
-    const tablaEstadisticas = document.getElementById('tabla-estadisticas');
-    tablaEstadisticas.innerHTML = '';
+    // Mostrar estadísticas en los paneles laterales
+    const statsLocal = document.getElementById('stats-local');
+    const statsVisitante = document.getElementById('stats-visitante');
+    
+    statsLocal.innerHTML = '';
+    statsVisitante.innerHTML = '';
     
     for (const [clave, valores] of Object.entries(estadisticas)) {
-        const fila = document.createElement('tr');
-        fila.innerHTML = `
-            <td class="text-end">${valores.local}</td>
-            <td class="text-center">${valores.nombre}</td>
-            <td class="text-start">${valores.visitante}</td>
+        // Crear elementos para estadísticas del equipo local
+        const statItemLocal = document.createElement('div');
+        statItemLocal.className = 'stat-item';
+        statItemLocal.innerHTML = `
+            <div class="d-flex justify-content-between">
+                <span class="stat-value text-info">${valores.local}</span>
+                <span class="stat-name">${valores.nombre}</span>
+            </div>
+            <div class="stat-bar">
+                <div class="stat-bar-fill bg-info" style="width: ${getPercentage(valores.local, valores.visitante)}%"></div>
+            </div>
         `;
-        tablaEstadisticas.appendChild(fila);
+        
+        // Crear elementos para estadísticas del equipo visitante
+        const statItemVisitante = document.createElement('div');
+        statItemVisitante.className = 'stat-item';
+        statItemVisitante.innerHTML = `
+            <div class="d-flex justify-content-between">
+                <span class="stat-name">${valores.nombre}</span>
+                <span class="stat-value text-danger">${valores.visitante}</span>
+            </div>
+            <div class="stat-bar">
+                <div class="stat-bar-fill bg-danger" style="width: ${100 - getPercentage(valores.local, valores.visitante)}%"></div>
+            </div>
+        `;
+        
+        statsLocal.appendChild(statItemLocal);
+        statsVisitante.appendChild(statItemVisitante);
     }
     
     // Generar momentos clave del partido
@@ -777,18 +897,55 @@ async function simularPartido() {
     const momentosPartido = document.getElementById('momentos-partido');
     momentosPartido.innerHTML = '';
     
-    momentos.forEach(momento => {
-        const elementoMomento = document.createElement('div');
-        elementoMomento.className = 'momento-partido';
-        elementoMomento.innerHTML = `
-            <div class="minuto">${momento.minuto}'</div>
-            <div class="contenido">
-                <strong>${momento.equipo}:</strong> ${momento.descripcion}
-                ${momento.tipo === 'gol' ? '<span class="badge bg-danger">GOL</span>' : ''}
-            </div>
-        `;
-        momentosPartido.appendChild(elementoMomento);
-    });
+    // Verificar que se hayan generado momentos
+    if (momentos.length === 0) {
+        momentosPartido.innerHTML = '<div class="text-center text-muted">No hay momentos destacados para mostrar</div>';
+    } else {
+        // Ordenar momentos por minuto
+        momentos.sort((a, b) => a.minuto - b.minuto);
+        
+        // Crear elementos para cada momento
+        momentos.forEach(momento => {
+            const elementoMomento = document.createElement('div');
+            elementoMomento.className = 'momento-partido';
+            
+            // Añadir clase adicional si es un gol
+            if (momento.tipo === 'gol') {
+                elementoMomento.classList.add('gol');
+            }
+            
+            elementoMomento.innerHTML = `
+                <div class="minuto">${momento.minuto}'</div>
+                <div class="contenido">
+                    <strong>${momento.equipo}:</strong> ${momento.descripcion}
+                    ${momento.tipo === 'gol' ? '<span class="badge bg-danger ms-1">GOL</span>' : ''}
+                </div>
+            `;
+            
+            momentosPartido.appendChild(elementoMomento);
+        });
+    }
+    
+    // Hacer scroll al inicio de los momentos
+    momentosPartido.scrollTop = 0;
+}
+
+// Función auxiliar para calcular porcentaje para barras de progreso
+function getPercentage(val1, val2) {
+    // Eliminar símbolos de porcentaje si existen
+    if (typeof val1 === 'string') val1 = val1.replace('%', '');
+    if (typeof val2 === 'string') val2 = val2.replace('%', '');
+    
+    // Convertir a números
+    val1 = parseFloat(val1);
+    val2 = parseFloat(val2);
+    
+    // Calcular porcentaje (mínimo 20%, máximo 80% para que siempre se vea algo)
+    const total = val1 + val2;
+    if (total === 0) return 50;
+    
+    const percentage = (val1 / total) * 100;
+    return Math.min(Math.max(percentage, 20), 80);
 }
 
 // Función para simular goles usando Poisson
