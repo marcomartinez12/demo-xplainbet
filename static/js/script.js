@@ -1771,3 +1771,489 @@ calculatePrediction = async function() {
     // Mostrar equipo favorito (ahora que tenemos todos los modelos)
     document.getElementById('favorite-team').textContent = favoriteTeam;
 };
+
+// ... existing code ...
+
+// ==========================================
+// MÓDULO DE MACHINE LEARNING PARA TÁCTICAS
+// ==========================================
+
+// Dataset ficticio para entrenamiento de modelos
+let ml_dataset = [];
+let ml_model = null;
+let ml_modelType = '';
+let ml_accuracy = 0;
+let currentTeam1 = null;
+let currentTeam2 = null;
+
+// Función para generar dataset ficticio
+function generarDatasetTacticas(numRegistros = 500) {
+    const dataset = [];
+    const tacticas = [
+        'Mantener 4-3-3 ofensivo',
+        'Cambiar a 4-4-2 defensivo',
+        'Presión alta y líneas adelantadas',
+        'Jugar al contragolpe',
+        'Bajar ritmo y mantener posesión',
+        'Atacar por bandas',
+        'Defensa con cinco jugadores'
+    ];
+    
+    // Generar registros aleatorios
+    for (let i = 0; i < numRegistros; i++) {
+        // Generar estadísticas aleatorias realistas
+        const goalsScored = Math.random() * 3 + 0.5; // 0.5 a 3.5
+        const goalsConceded = Math.random() * 2.5 + 0.2; // 0.2 a 2.7
+        const possession = Math.random() * 40 + 30; // 30 a 70
+        const shotsOnTarget = Math.random() * 8 + 2; // 2 a 10
+        const passingAccuracy = Math.random() * 20 + 70; // 70 a 90
+        const fouls = Math.random() * 10 + 5; // 5 a 15
+        const corners = Math.random() * 8 + 2; // 2 a 10
+        const yellowCards = Math.random() * 3 + 0.5; // 0.5 a 3.5
+        const redCards = Math.random() * 0.3; // 0 a 0.3
+        
+        // Asignar táctica basada en patrones realistas
+        let tacticaIndex;
+        
+        // Equipos ofensivos con buena posesión
+        if (goalsScored > 2.5 && possession > 60 && passingAccuracy > 85) {
+            tacticaIndex = Math.random() > 0.5 ? 0 : 4; // 4-3-3 ofensivo o mantener posesión
+        }
+        // Equipos defensivos
+        else if (goalsConceded < 1 && shotsOnTarget < 5) {
+            tacticaIndex = Math.random() > 0.5 ? 1 : 6; // 4-4-2 defensivo o defensa con 5
+        }
+        // Equipos de presión
+        else if (fouls > 12 && yellowCards > 2) {
+            tacticaIndex = 2; // Presión alta
+        }
+        // Equipos de contragolpe
+        else if (possession < 45 && goalsScored > 1.5) {
+            tacticaIndex = 3; // Contragolpe
+        }
+        // Equipos de bandas
+        else if (corners > 6) {
+            tacticaIndex = 5; // Atacar por bandas
+        }
+        else {
+            // Asignar aleatoriamente para el resto
+            tacticaIndex = Math.floor(Math.random() * tacticas.length);
+        }
+        
+        // Añadir registro al dataset
+        dataset.push({
+            features: [goalsScored, goalsConceded, possession, shotsOnTarget, 
+                      passingAccuracy, fouls, corners, yellowCards, redCards],
+            tactica: tacticas[tacticaIndex]
+        });
+    }
+    
+    return dataset;
+}
+
+// Función para normalizar datos
+function normalizarDatos(datos) {
+    // Calcular min y max para cada característica
+    const numFeatures = datos[0].features.length;
+    const mins = Array(numFeatures).fill(Infinity);
+    const maxs = Array(numFeatures).fill(-Infinity);
+    
+    // Encontrar min y max
+    for (const dato of datos) {
+        for (let i = 0; i < numFeatures; i++) {
+            mins[i] = Math.min(mins[i], dato.features[i]);
+            maxs[i] = Math.max(maxs[i], dato.features[i]);
+        }
+    }
+    
+    // Normalizar datos
+    const datosNormalizados = datos.map(dato => {
+        const featuresNormalizados = dato.features.map((val, i) => {
+            // Evitar división por cero
+            return maxs[i] === mins[i] ? 0.5 : (val - mins[i]) / (maxs[i] - mins[i]);
+        });
+        
+        return {
+            features: featuresNormalizados,
+            tactica: dato.tactica
+        };
+    });
+    
+    return {
+        datosNormalizados,
+        mins,
+        maxs
+    };
+}
+
+// Implementación simplificada de MLPClassifier
+class MLPClassifier {
+    constructor(hiddenLayerSizes = [10], learningRate = 0.01, maxIter = 100) {
+        this.hiddenLayerSizes = hiddenLayerSizes;
+        this.learningRate = learningRate;
+        this.maxIter = maxIter;
+        this.weights = [];
+        this.biases = [];
+        this.classes = [];
+        this.accuracy = 0;
+    }
+    
+    // Función de activación sigmoid
+    sigmoid(x) {
+        return 1 / (1 + Math.exp(-x));
+    }
+    
+    // Derivada de sigmoid
+    sigmoidDerivative(x) {
+        const sig = this.sigmoid(x);
+        return sig * (1 - sig);
+    }
+    
+    // Entrenar el modelo
+    fit(X, y) {
+        // Obtener clases únicas
+        this.classes = [...new Set(y)];
+        const numClasses = this.classes.length;
+        const numFeatures = X[0].length;
+        
+        // Inicializar pesos y sesgos
+        const layerSizes = [numFeatures, ...this.hiddenLayerSizes, numClasses];
+        
+        for (let i = 0; i < layerSizes.length - 1; i++) {
+            // Inicializar pesos con valores pequeños aleatorios
+            const weights = Array(layerSizes[i + 1]).fill().map(() => 
+                Array(layerSizes[i]).fill().map(() => Math.random() * 0.2 - 0.1)
+            );
+            
+            // Inicializar sesgos con ceros
+            const biases = Array(layerSizes[i + 1]).fill(0);
+            
+            this.weights.push(weights);
+            this.biases.push(biases);
+        }
+        
+        // Convertir etiquetas a one-hot encoding
+        const yOneHot = y.map(label => {
+            const encoded = Array(numClasses).fill(0);
+            encoded[this.classes.indexOf(label)] = 1;
+            return encoded;
+        });
+        
+        // Entrenamiento con descenso de gradiente
+        for (let iter = 0; iter < this.maxIter; iter++) {
+            let totalError = 0;
+            
+            // Para cada ejemplo de entrenamiento
+            for (let j = 0; j < X.length; j++) {
+                // Forward pass
+                const activations = [X[j]];
+                const zs = [];
+                
+                for (let layer = 0; layer < this.weights.length; layer++) {
+                    const z = Array(this.weights[layer].length).fill(0);
+                    
+                    // Calcular z = w*a + b
+                    for (let neuron = 0; neuron < this.weights[layer].length; neuron++) {
+                        for (let prev = 0; prev < activations[layer].length; prev++) {
+                            z[neuron] += this.weights[layer][neuron][prev] * activations[layer][prev];
+                        }
+                        z[neuron] += this.biases[layer][neuron];
+                    }
+                    
+                    zs.push(z);
+                    
+                    // Aplicar función de activación
+                    const activation = z.map(val => this.sigmoid(val));
+                    activations.push(activation);
+                }
+                
+                // Calcular error
+                const outputError = activations[activations.length - 1].map((a, i) => {
+                    const error = a - yOneHot[j][i];
+                    totalError += error * error;
+                    return error;
+                });
+                
+                // Backward pass
+                let deltas = [outputError.map((err, i) => 
+                    err * this.sigmoidDerivative(zs[zs.length - 1][i])
+                )];
+                
+                // Propagar el error hacia atrás
+                for (let layer = this.weights.length - 2; layer >= 0; layer--) {
+                    const delta = Array(this.weights[layer].length).fill(0);
+                    
+                    for (let neuron = 0; neuron < this.weights[layer].length; neuron++) {
+                        for (let next = 0; next < this.weights[layer + 1].length; next++) {
+                            delta[neuron] += deltas[0][next] * this.weights[layer + 1][next][neuron];
+                        }
+                        delta[neuron] *= this.sigmoidDerivative(zs[layer][neuron]);
+                    }
+                    
+                    deltas.unshift(delta);
+                }
+                
+                // Actualizar pesos y sesgos
+                for (let layer = 0; layer < this.weights.length; layer++) {
+                    for (let neuron = 0; neuron < this.weights[layer].length; neuron++) {
+                        for (let prev = 0; prev < this.weights[layer][neuron].length; prev++) {
+                            this.weights[layer][neuron][prev] -= this.learningRate * deltas[layer][neuron] * activations[layer][prev];
+                        }
+                        this.biases[layer][neuron] -= this.learningRate * deltas[layer][neuron];
+                    }
+                }
+            }
+            
+            // Calcular error promedio
+            totalError /= X.length;
+            
+            // Salir temprano si el error es suficientemente pequeño
+            if (totalError < 0.01) break;
+        }
+        
+        // Calcular precisión en el conjunto de entrenamiento
+        let correctPredictions = 0;
+        for (let i = 0; i < X.length; i++) {
+            const predicted = this.predict([X[i]])[0];
+            if (predicted === y[i]) correctPredictions++;
+        }
+        this.accuracy = correctPredictions / X.length;
+        
+        return this;
+    }
+    
+    // Predecir para nuevos datos
+    predict(X) {
+        return X.map(x => {
+            // Forward pass
+            let activation = x;
+            
+            for (let layer = 0; layer < this.weights.length; layer++) {
+                const z = Array(this.weights[layer].length).fill(0);
+                
+                // Calcular z = w*a + b
+                for (let neuron = 0; neuron < this.weights[layer].length; neuron++) {
+                    for (let prev = 0; prev < activation.length; prev++) {
+                        z[neuron] += this.weights[layer][neuron][prev] * activation[prev];
+                    }
+                    z[neuron] += this.biases[layer][neuron];
+                }
+                
+                // Aplicar función de activación
+                activation = z.map(val => this.sigmoid(val));
+            }
+            
+            // Obtener la clase con mayor probabilidad
+            let maxIndex = 0;
+            for (let i = 1; i < activation.length; i++) {
+                if (activation[i] > activation[maxIndex]) maxIndex = i;
+            }
+            
+            return this.classes[maxIndex];
+        });
+    }
+}
+
+// Función para entrenar modelos
+function entrenarModelos() {
+    // Generar dataset
+    ml_dataset = generarDatasetTacticas(500);
+    
+    // Separar características y etiquetas
+    const X = ml_dataset.map(d => d.features);
+    const y = ml_dataset.map(d => d.tactica);
+    
+    // Normalizar datos
+    const { datosNormalizados, mins, maxs } = normalizarDatos(ml_dataset);
+    const X_norm = datosNormalizados.map(d => d.features);
+    
+    // Guardar mins y maxs para normalizar nuevos datos
+    ml_dataset.mins = mins;
+    ml_dataset.maxs = maxs;
+    
+    // Entrenar modelo MLP
+    ml_model = new MLPClassifier([15, 10], 0.01, 200);
+    ml_model.fit(X_norm, y);
+    ml_accuracy = ml_model.accuracy;
+    ml_modelType = 'Red Neuronal Multicapa';
+    
+    console.log(`Modelo entrenado con precisión: ${(ml_accuracy * 100).toFixed(2)}%`);
+}
+
+// Función para normalizar nuevos datos
+function normalizarNuevosDatos(datos) {
+    if (!ml_dataset.mins || !ml_dataset.maxs) {
+        console.error("No se han calculado los valores de normalización");
+        return datos;
+    }
+    
+    return datos.map((val, i) => {
+        // Evitar división por cero
+        return ml_dataset.maxs[i] === ml_dataset.mins[i] ? 
+            0.5 : (val - ml_dataset.mins[i]) / (ml_dataset.maxs[i] - ml_dataset.mins[i]);
+    });
+}
+
+// Función para recomendar táctica basada en estadísticas
+function recomendar_tactica_ml(stats) {
+    // Verificar que el modelo esté entrenado
+    if (!ml_model) {
+        console.error("El modelo no ha sido entrenado");
+        return {
+            tactica: "No disponible",
+            explicacion: "El modelo de ML no ha sido entrenado correctamente.",
+            modelo: "Ninguno",
+            precision: 0
+        };
+    }
+    
+    // Extraer características en el mismo orden que el dataset
+    const features = [
+        stats.goalsScored,
+        stats.goalsConceded,
+        stats.possession,
+        stats.shotsOnTarget,
+        stats.passingAccuracy,
+        stats.fouls,
+        stats.corners,
+        stats.yellowCards,
+        stats.redCards
+    ];
+    
+    // Normalizar datos
+    const featuresNormalizados = normalizarNuevosDatos(features);
+    
+    // Realizar predicción
+    const tacticaRecomendada = ml_model.predict([featuresNormalizados])[0];
+    
+    // Generar explicación basada en estadísticas
+    let explicacion = "";
+    
+    if (tacticaRecomendada === "Mantener 4-3-3 ofensivo") {
+        explicacion = `Con un promedio de ${stats.goalsScored.toFixed(1)} goles por partido y ${stats.possession.toFixed(1)}% de posesión, el equipo tiene un perfil ofensivo. La formación 4-3-3 permitirá maximizar el potencial de ataque manteniendo equilibrio defensivo.`;
+    } else if (tacticaRecomendada === "Cambiar a 4-4-2 defensivo") {
+        explicacion = `Con ${stats.goalsConceded.toFixed(1)} goles recibidos por partido, el equipo necesita reforzar su defensa. La formación 4-4-2 defensiva proporcionará mayor solidez y permitirá contragolpes efectivos.`;
+    } else if (tacticaRecomendada === "Presión alta y líneas adelantadas") {
+        explicacion = `Con ${stats.passingAccuracy.toFixed(1)}% de precisión en pases y ${stats.shotsOnTarget.toFixed(1)} tiros a puerta, el equipo puede beneficiarse de una presión alta para recuperar el balón en campo contrario y crear más oportunidades.`;
+    } else if (tacticaRecomendada === "Jugar al contragolpe") {
+        explicacion = `Con una posesión de ${stats.possession.toFixed(1)}% pero anotando ${stats.goalsScored.toFixed(1)} goles por partido, el equipo es eficiente en transiciones. El contragolpe permitirá aprovechar espacios y la velocidad de los delanteros.`;
+    } else if (tacticaRecomendada === "Bajar ritmo y mantener posesión") {
+        explicacion = `Con ${stats.passingAccuracy.toFixed(1)}% de precisión en pases y ${stats.possession.toFixed(1)}% de posesión, el equipo puede controlar el juego. Mantener la posesión desgastará al rival y creará oportunidades de calidad.`;
+    } else if (tacticaRecomendada === "Atacar por bandas") {
+        explicacion = `Con un promedio de ${stats.corners.toFixed(1)} córners por partido, el equipo muestra fortaleza en el juego por las bandas. Explotar esta vía de ataque generará más oportunidades de gol y centros peligrosos.`;
+    } else if (tacticaRecomendada === "Defensa con cinco jugadores") {
+        explicacion = `Con ${stats.goalsConceded.toFixed(1)} goles recibidos y ${stats.yellowCards.toFixed(1)} tarjetas amarillas por partido, una defensa de cinco proporcionará mayor solidez defensiva y reducirá la exposición a contraataques.`;
+    }
+    
+    return {
+        tactica: tacticaRecomendada,
+        explicacion: explicacion,
+        modelo: ml_modelType,
+        precision: ml_accuracy
+    };
+}
+
+// Inicializar el módulo ML cuando se cargue la página
+document.addEventListener('DOMContentLoaded', function() {
+    // Verificar si el botón existe
+    const mlButton = document.getElementById('simulation-ml');
+    if (mlButton) {
+        mlButton.addEventListener('click', function() {
+            // Verificar que hay datos de equipos
+            if (!currentResults) {
+                alert("Primero debes realizar una predicción antes de solicitar un análisis");
+                return;
+            }
+            
+            // Actualizar variables globales con los datos actuales
+            currentTeam1 = {
+                name: currentResults.team1.name,
+                stats: currentResults.team1.stats
+            };
+            
+            currentTeam2 = {
+                name: currentResults.team2.name,
+                stats: currentResults.team2.stats
+            };
+            
+            // Mostrar cargando
+            const mlResult = document.getElementById('ml-result');
+            if (mlResult) {
+                mlResult.innerHTML = `
+  <style>
+    @keyframes fillBar {
+      from { width: 0%; }
+      to   { width: 100%; }
+    }
+  </style>
+  <div class="text-center mb-4">
+    <h5>Analizando tácticas óptimas</h5>
+    <div class="progress" style="height: 25px;">
+      <div class="progress-bar bg-success" 
+           role="progressbar"
+           style="
+             width: 0%;
+             animation: fillBar 1s linear forwards;
+           "
+           aria-valuemin="0"
+           aria-valuemax="100">
+        <!-- Opcional: porcentaje fijo o vacío -->
+      </div>
+    </div>
+  </div>
+`;
+                
+                // Pequeño retraso para mostrar la animación de carga
+                setTimeout(() => {
+                    // Obtener recomendación para ambos equipos
+                    const recomendacionEquipo1 = recomendar_tactica_ml(currentTeam1.stats);
+                    const recomendacionEquipo2 = recomendar_tactica_ml(currentTeam2.stats);
+                    
+                    // Mostrar resultado para ambos equipos
+                    mlResult.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-header bg-primary">
+                                        <h5>Recomendación Táctica para ${currentTeam1.name}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="text-success mb-3">${recomendacionEquipo1.tactica}</h4>
+                                        <p>${recomendacionEquipo1.explicacion}</p>
+                                        <div class="mt-3 pt-3 border-top border-secondary">
+                                            <small class="text-muted">
+                                                Modelo utilizado: ${recomendacionEquipo1.modelo} (Precisión: ${(recomendacionEquipo1.precision * 100).toFixed(2)}%)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-dark text-white mb-4">
+                                    <div class="card-header bg-danger">
+                                        <h5>Recomendación Táctica para ${currentTeam2.name}</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <h4 class="text-success mb-3">${recomendacionEquipo2.tactica}</h4>
+                                        <p>${recomendacionEquipo2.explicacion}</p>
+                                        <div class="mt-3 pt-3 border-top border-secondary">
+                                            <small class="text-muted">
+                                                Modelo utilizado: ${recomendacionEquipo2.modelo} (Precisión: ${(recomendacionEquipo2.precision * 100).toFixed(2)}%)
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }, 1500);
+            }
+        });
+    }
+    
+    // Pre-entrenar modelos en segundo plano
+    setTimeout(() => {
+        console.log("Pre-entrenando modelos de ML...");
+        entrenarModelos();
+    }, 3000);
+});
