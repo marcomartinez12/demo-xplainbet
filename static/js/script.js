@@ -548,6 +548,59 @@ async function showAIExplanation() {
     explanationDiv.innerHTML = '<p class="text-info">Solicitando análisis, por favor espera...</p>';
 
     try {
+        // Obtener la probabilidad más alta entre los tres modelos
+        const team1 = currentResults.team1.name;
+        const team2 = currentResults.team2.name;
+        const favoriteTeam = currentResults.favoriteTeam;
+        
+        // Obtener probabilidades para el equipo favorito de cada modelo
+        let poissonProb, logisticProb, xgboostProb;
+        
+        if (favoriteTeam === team1) {
+            poissonProb = parseFloat(currentResults.team1.winProbability);
+            logisticProb = currentResults.logisticRegression ? parseFloat(currentResults.logisticRegression.team1Win) : 0;
+            xgboostProb = currentResults.xgboost ? parseFloat(currentResults.xgboost.team1Win) : 0;
+        } else if (favoriteTeam === team2) {
+            poissonProb = parseFloat(currentResults.team2.winProbability);
+            logisticProb = currentResults.logisticRegression ? parseFloat(currentResults.logisticRegression.team2Win) : 0;
+            xgboostProb = currentResults.xgboost ? parseFloat(currentResults.xgboost.team2Win) : 0;
+        } else {
+            // Si el favorito es empate
+            poissonProb = parseFloat(currentResults.drawProbability);
+            logisticProb = currentResults.logisticRegression ? parseFloat(currentResults.logisticRegression.draw) : 0;
+            xgboostProb = currentResults.xgboost ? parseFloat(currentResults.xgboost.draw) : 0;
+        }
+        
+        // Determinar la probabilidad más alta
+        let highestProb = poissonProb;
+        let bestModel = "Poisson";
+        
+        if (logisticProb > highestProb) {
+            highestProb = logisticProb;
+            bestModel = "Regresión Logística";
+        }
+        
+        if (xgboostProb > highestProb) {
+            highestProb = xgboostProb;
+            bestModel = "XGBoost";
+        }
+        
+        // Preparar datos para enviar al servidor
+        const requestData = {
+            team1: currentResults.team1,
+            team2: currentResults.team2,
+            favoriteTeam: favoriteTeam,
+            winProbability: highestProb.toFixed(2),
+            drawProbability: currentResults.drawProbability,
+            resultMatrix: currentResults.resultMatrix,
+            logisticRegression: currentResults.logisticRegression,
+            xgboost: currentResults.xgboost,
+            modelReliability: {
+                reliableModel: bestModel,
+                scenario: currentResults.modelReliability ? currentResults.modelReliability.scenario : "Estándar"
+            }
+        };
+
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -556,7 +609,7 @@ async function showAIExplanation() {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify(currentResults),
+            body: JSON.stringify(requestData),
             signal: controller.signal
         });
 
@@ -695,9 +748,7 @@ async function simularPartido() {
                     </div>
                     <div class="modal-footer border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">CERRAR</button>
-                        <button type="button" id="nueva-simulacion-btn" class="btn btn-success">
-                            <i class="fas fa-redo me-2"></i>NUEVA SIMULACIÓN
-                        </button>
+                        
                     </div>
                 </div>
             </div>
@@ -1133,3 +1184,590 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error("No se encontró el botón de simulación");
     }
 });
+
+// Clase para el modelo de Regresión Logística
+class LogisticRegressionModel {
+    constructor() {
+        // Coeficientes del modelo (simulados)
+        this.coefficients = {
+            goalsScored: 0.65,
+            goalsConceded: -0.55,
+            possession: 0.40,
+            shotsOnTarget: 0.45,
+            passingAccuracy: 0.35,
+            fouls: -0.15,
+            corners: 0.25,
+            yellowCards: -0.10,
+            redCards: -0.30
+        };
+    }
+    
+    predict(stats1, stats2) {
+        // Calcular puntuación para cada equipo
+        let score1 = 0;
+        let score2 = 0;
+        
+        for (const [stat, coef] of Object.entries(this.coefficients)) {
+            // Normalizar estadísticas porcentuales
+            if (stat === 'possession' || stat === 'passingAccuracy') {
+                score1 += (stats1[stat] / 100) * coef;
+                score2 += (stats2[stat] / 100) * coef;
+            } else {
+                score1 += stats1[stat] * coef;
+                score2 += stats2[stat] * coef;
+            }
+        }
+        
+        // Calcular probabilidades con función logística
+        const diff = score1 - score2;
+        const team1Win = 100 / (1 + Math.exp(-diff * 1.5));
+        const team2Win = 100 / (1 + Math.exp(diff * 1.5));
+        
+        // Ajustar para que sumen 100% con la probabilidad de empate
+        const total = team1Win + team2Win;
+        const normalizedTeam1Win = (team1Win / total) * 85; // Dejamos 15% para empate
+        const normalizedTeam2Win = (team2Win / total) * 85;
+        const draw = 100 - normalizedTeam1Win - normalizedTeam2Win;
+        
+        return {
+            team1Win: normalizedTeam1Win,
+            team2Win: normalizedTeam2Win,
+            draw: draw
+        };
+    }
+}
+
+// Clase para el modelo XGBoost
+class XGBoostModel {
+    constructor() {
+        // Simulación de árboles de decisión
+        this.trees = [
+            {
+                feature: 'goalsScored',
+                threshold: 2.0,
+                weight: 0.8,
+                leftNode: { value: -0.3 },
+                rightNode: { value: 0.5 }
+            },
+            {
+                feature: 'goalsConceded',
+                threshold: 1.0,
+                weight: 0.7,
+                leftNode: { value: 0.4 },
+                rightNode: { value: -0.2 }
+            },
+            {
+                feature: 'possession',
+                threshold: 60,
+                weight: 0.5,
+                leftNode: { value: -0.1 },
+                rightNode: { value: 0.3 }
+            },
+            {
+                feature: 'shotsOnTarget',
+                threshold: 5.5,
+                weight: 0.6,
+                leftNode: { value: -0.2 },
+                rightNode: { value: 0.4 }
+            },
+            {
+                feature: 'passingAccuracy',
+                threshold: 85,
+                weight: 0.4,
+                leftNode: { value: -0.1 },
+                rightNode: { value: 0.2 }
+            }
+        ];
+    }
+    
+    predict(stats1, stats2) {
+        // Preparar características combinadas
+        const features = {
+            goalsScored: (stats1.goalsScored - stats2.goalsScored) / 5,
+            goalsConceded: (stats2.goalsConceded - stats1.goalsConceded) / 5,
+            possession: (stats1.possession - stats2.possession) / 100,
+            shotsOnTarget: (stats1.shotsOnTarget - stats2.shotsOnTarget) / 5,
+            passingAccuracy: (stats1.passingAccuracy - stats2.passingAccuracy) / 100,
+            combinedAttack: ((stats1.shotsOnTarget + stats1.corners) - (stats2.shotsOnTarget + stats2.corners)) / 5,
+            discipline: ((stats2.yellowCards + stats2.redCards * 3) - (stats1.yellowCards + stats1.redCards * 3)) / 5
+        };
+        
+        // Calcular puntuación base
+        let score = 0;
+        
+        // Aplicar cada árbol
+        for (const tree of this.trees) {
+            const featureValue = features[tree.feature] || 0;
+            if (featureValue <= tree.threshold) {
+                score += tree.leftNode.value * tree.weight;
+            } else {
+                score += tree.rightNode.value * tree.weight;
+            }
+        }
+        
+        // Convertir puntuación a probabilidades
+        const team1Win = 100 / (1 + Math.exp(-score * 2));
+        const team2Win = 100 - team1Win;
+        
+        // Ajustar para incluir empate
+        const adjustedTeam1Win = team1Win * 0.85;
+        const adjustedTeam2Win = team2Win * 0.85;
+        const draw = 100 - adjustedTeam1Win - adjustedTeam2Win;
+        
+        return {
+            team1Win: adjustedTeam1Win,
+            team2Win: adjustedTeam2Win,
+            draw: draw
+        };
+    }
+}
+
+// Función para determinar el modelo más confiable según el escenario
+function determineReliableModel(stats1, stats2, poissonProb, logisticProb, xgboostProb) {
+    // Detectar escenarios específicos
+    const isHighScoring = stats1.goalsScored > 2.5 && stats2.goalsScored > 2.5;
+    const isLowScoring = stats1.goalsScored < 1.5 && stats2.goalsScored < 1.5;
+    const isBalanced = Math.abs(stats1.goalsScored - stats2.goalsScored) < 0.5;
+    const isUnbalanced = Math.abs(stats1.goalsScored - stats2.goalsScored) > 1.5;
+    
+    let reliableModel = "Poisson";
+    let scenario = "Estándar";
+    
+    // Determinar escenario y modelo más confiable
+    if (isHighScoring) {
+        scenario = "Equipos de alto rendimiento ofensivo";
+        reliableModel = "XGBoost";
+    } else if (isLowScoring) {
+        scenario = "Equipos defensivos";
+        reliableModel = "Regresión Logística";
+    } else if (isBalanced) {
+        scenario = "Equipos equilibrados";
+        reliableModel = "Consenso";
+    } else if (isUnbalanced) {
+        scenario = "Diferencia significativa entre equipos";
+        reliableModel = "Poisson";
+    }
+    
+    // Calcular probabilidades de consenso (promedio ponderado)
+    const consensusProb = {
+        team1Win: (poissonProb.team1Win * 0.4 + logisticProb.team1Win * 0.3 + xgboostProb.team1Win * 0.3),
+        draw: (poissonProb.draw * 0.4 + logisticProb.draw * 0.3 + xgboostProb.draw * 0.3),
+        team2Win: (poissonProb.team2Win * 0.4 + logisticProb.team2Win * 0.3 + xgboostProb.team2Win * 0.3)
+    };
+    
+    return {
+        scenario,
+        reliableModel,
+        consensusProb
+    };
+}
+
+// Función para crear gráfico comparativo de modelos
+function createModelComparisonChart(team1, team2, poissonProb, logisticProb, xgboostProb) {
+    // Destruir gráfico anterior si existe
+    if (chart) {
+        chart.destroy();
+    }
+    
+    const ctx = document.getElementById('stats-chart').getContext('2d');
+    
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [`Victoria ${team1}`, 'Empate', `Victoria ${team2}`],
+            datasets: [
+                {
+                    label: 'Poisson',
+                    data: [poissonProb.team1Win, poissonProb.draw, poissonProb.team2Win],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Regresión Logística',
+                    data: [logisticProb.team1Win, logisticProb.draw, logisticProb.team2Win],
+                    backgroundColor: 'rgba(255, 99, 132, 0.7)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'XGBoost',
+                    data: [xgboostProb.team1Win, xgboostProb.draw, xgboostProb.team2Win],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            animation: {
+                duration: 1500,
+                easing: 'easeOutQuart'
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        color: '#fff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        color: '#fff'
+                    },
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#fff'
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            if (context.parsed.y !== null) {
+                                label += context.parsed.y.toFixed(2) + '%';
+                            }
+                            return label;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Función para actualizar el modelo recomendado en la interfaz
+function updateRecommendedModel() {
+    if (!currentResults || !currentResults.logisticRegression || !currentResults.xgboost) {
+        return; // No hay resultados de los tres modelos todavía
+    }
+    
+    const team1 = currentResults.team1.name;
+    const team2 = currentResults.team2.name;
+    const favoriteTeam = currentResults.favoriteTeam;
+    
+    // Obtener probabilidades para el equipo favorito de cada modelo
+    let poissonProb, logisticProb, xgboostProb;
+    
+    if (favoriteTeam === team1) {
+        poissonProb = parseFloat(currentResults.team1.winProbability);
+        logisticProb = parseFloat(currentResults.logisticRegression.team1Win);
+        xgboostProb = parseFloat(currentResults.xgboost.team1Win);
+    } else if (favoriteTeam === team2) {
+        poissonProb = parseFloat(currentResults.team2.winProbability);
+        logisticProb = parseFloat(currentResults.logisticRegression.team2Win);
+        xgboostProb = parseFloat(currentResults.xgboost.team2Win);
+    } else {
+        // Si el favorito es empate
+        poissonProb = parseFloat(currentResults.drawProbability);
+        logisticProb = parseFloat(currentResults.logisticRegression.draw);
+        xgboostProb = parseFloat(currentResults.xgboost.draw);
+    }
+    
+    // Determinar el modelo con la probabilidad más alta
+    let bestModel = "Poisson";
+    let highestProb = poissonProb;
+    
+    if (logisticProb > highestProb) {
+        bestModel = "Regresión Logística";
+        highestProb = logisticProb;
+    }
+    
+    if (xgboostProb > highestProb) {
+        bestModel = "XGBoost";
+        highestProb = xgboostProb;
+    }
+    
+    // Actualizar el elemento HTML que muestra el modelo recomendado
+    const recommendedModelElement = document.getElementById('recommended-model');
+    if (recommendedModelElement) {
+        recommendedModelElement.textContent = `Modelo recomendado: ${bestModel}`;
+    }
+    
+    // Actualizar la probabilidad de victoria con el valor más alto
+    const winProbabilityElement = document.getElementById('win-probability');
+    if (winProbabilityElement) {
+        winProbabilityElement.textContent = `${highestProb.toFixed(2)}%`;
+    }
+}
+
+// Modificar la función calculatePrediction para incluir los nuevos modelos
+const originalCalculatePrediction = calculatePrediction;
+
+calculatePrediction = async function() {
+    // Mostrar sección de resultados
+    document.getElementById('results-section').style.display = 'block';
+    
+    // Scroll a la sección de resultados
+    document.getElementById('results-section').scrollIntoView({ behavior: 'smooth' });
+    
+    // Limpiar terminal
+    const terminal = document.getElementById('terminal-content');
+    terminal.innerHTML = '';
+    
+    // Ocultar resultados anteriores si existen
+    const predictionResults = document.getElementById('prediction-results');
+    predictionResults.classList.remove('show');
+    
+    // Ocultar equipo favorito y probabilidad hasta que se completen todos los modelos
+    document.getElementById('favorite-team').textContent = "Calculando...";
+    document.getElementById('win-probability').textContent = "...";
+    document.getElementById('recommended-model').textContent = "Modelo recomendado: Calculando...";
+    
+    // Recolectar datos del formulario
+    const team1 = document.getElementById('team1').value;
+    const team2 = document.getElementById('team2').value;
+    
+    // Obtener todas las estadísticas para cada equipo
+    const stats1 = {};
+    const stats2 = {};
+    
+    for (const stat in LAMBDA_FACTORS) {
+        stats1[stat] = parseFloat(document.getElementById(stat + '1').value);
+        stats2[stat] = parseFloat(document.getElementById(stat + '2').value);
+    }
+    
+    // Iniciar animación de cálculo en la terminal
+    await typeTerminalText(terminal, `$ Iniciando cálculo de predicción con múltiples modelos...`);
+    await typeTerminalText(terminal, `$ Analizando estadísticas para ${team1} y ${team2}...`);
+    await new Promise(resolve => setTimeout(resolve, calculationDelay));
+    
+    // ===== MODELO DE POISSON =====
+    await typeTerminalText(terminal, '\n$ Ejecutando modelo de Poisson...');
+    
+    // Calcular lambdas para cada equipo (tasa media de goles esperados)
+    const [lambda1, detailedCalc1] = await calculateLambda(terminal, team1, stats1, stats2);
+    const [lambda2, detailedCalc2] = await calculateLambda(terminal, team2, stats2, stats1);
+    
+    // Comparación final
+    await typeTerminalText(terminal, '\n$ Calculando probabilidades de resultados con Poisson...');
+    await new Promise(resolve => setTimeout(resolve, calculationDelay));
+
+    // Agrega esta línea para definir el máximo de goles a considerar
+    const maxGoals = 5;
+
+    // Calcular probabilidades completas
+    let resultMatrix = [];
+    let team1WinProb = 0;
+    let team2WinProb = 0;
+    let drawProb = 0;
+    for (let i = 0; i <= maxGoals; i++) {
+        resultMatrix[i] = [];
+        for (let j = 0; j <= maxGoals; j++) {
+            const prob = poissonProbability(lambda1, i) * poissonProbability(lambda2, j);
+            resultMatrix[i][j] = prob;
+            if (i > j) team1WinProb += prob;
+            else if (i < j) team2WinProb += prob;
+            else drawProb += prob;
+        }
+    }
+    
+    // Calcular probabilidad para resultados con más de maxGoals (simplificado)
+    const remainingProb = 1 - (team1WinProb + team2WinProb + drawProb);
+    // Distribuir el remanente proporcionalmente
+    if (remainingProb > 0) {
+        const total = team1WinProb + team2WinProb + drawProb;
+        team1WinProb += remainingProb * (team1WinProb / total);
+        team2WinProb += remainingProb * (team2WinProb / total);
+        drawProb += remainingProb * (drawProb / total);
+    }
+    
+    // Convertir a porcentajes
+    team1WinProb *= 100;
+    team2WinProb *= 100;
+    drawProb *= 100;
+    
+    await typeTerminalText(terminal, `\n<span class="info">Probabilidad victoria ${team1} (Poisson):</span> <span class="result">${team1WinProb.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="info">Probabilidad empate (Poisson):</span> <span class="result">${drawProb.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="info">Probabilidad victoria ${team2} (Poisson):</span> <span class="result">${team2WinProb.toFixed(2)}%</span>`);
+    
+    // Determinar equipo favorito según Poisson
+    let favoriteTeam, winProbability;
+    
+    if (team1WinProb > team2WinProb && team1WinProb > drawProb) {
+        favoriteTeam = team1;
+        winProbability = team1WinProb.toFixed(2);
+    } else if (team2WinProb > team1WinProb && team2WinProb > drawProb) {
+        favoriteTeam = team2;
+        winProbability = team2WinProb.toFixed(2);
+    } else {
+        favoriteTeam = "Empate";
+        winProbability = drawProb.toFixed(2);
+    }
+    
+    // Guardar resultados de Poisson
+    currentResults = {
+        team1: {
+            name: team1,
+            stats: stats1,
+            lambda: lambda1,
+            winProbability: team1WinProb.toFixed(2),
+            detailedCalculation: detailedCalc1
+        },
+        team2: {
+            name: team2,
+            stats: stats2,
+            lambda: lambda2,
+            winProbability: team2WinProb.toFixed(2),
+            detailedCalculation: detailedCalc2
+        },
+        drawProbability: drawProb.toFixed(2),
+        favoriteTeam: favoriteTeam,
+        winProbability: winProbability,
+        resultMatrix: resultMatrix.slice(0, maxGoals + 1).map(row => row.slice(0, maxGoals + 1))
+    };
+    
+    // Convertir probabilidades de Poisson al formato común
+    const poissonProb = {
+        team1Win: team1WinProb,
+        draw: drawProb,
+        team2Win: team2WinProb
+    };
+    
+    // ===== REGRESIÓN LOGÍSTICA =====
+    await typeTerminalText(terminal, '\n$ Ejecutando modelo de Regresión Logística...');
+    
+    // Mostrar proceso paso a paso de Regresión Logística
+    await typeTerminalText(terminal, `<span class="info">Analizando diferencias estadísticas entre ${team1} y ${team2}...</span>`);
+    
+    // Crear y ejecutar el modelo de Regresión Logística
+    const logisticModel = new LogisticRegressionModel();
+    
+    // Mostrar los coeficientes del modelo
+    await typeTerminalText(terminal, `<span class="highlight">Coeficientes del modelo:</span>`);
+    for (const [stat, coef] of Object.entries(logisticModel.coefficients)) {
+        await typeTerminalText(terminal, `<span class="info">${stat}:</span> ${coef.toFixed(2)}`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    // Calcular diferencias entre equipos para cada estadística
+    const statDiffs = {};
+    for (const stat in logisticModel.coefficients) {
+        statDiffs[stat] = stats1[stat] - stats2[stat];
+        
+        // Normalizar diferencias para estadísticas porcentuales
+        if (stat === 'possession' || stat === 'passingAccuracy') {
+            statDiffs[stat] /= 100;
+        }
+        
+        await typeTerminalText(terminal, `<span class="info">Diferencia en ${stat}:</span> ${statDiffs[stat].toFixed(2)}`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    // Calcular puntuaciones
+    await typeTerminalText(terminal, `<span class="highlight">Calculando puntuaciones...</span>`);
+    
+    // Obtener las probabilidades
+    const logisticProb = logisticModel.predict(stats1, stats2);
+    
+    await typeTerminalText(terminal, `<span class="result">Probabilidad victoria ${team1} (Regresión Logística):</span> <span class="highlight">${logisticProb.team1Win.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="result">Probabilidad empate (Regresión Logística):</span> <span class="highlight">${logisticProb.draw.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="result">Probabilidad victoria ${team2} (Regresión Logística):</span> <span class="highlight">${logisticProb.team2Win.toFixed(2)}%</span>`);
+    
+    // ===== XGBOOST =====
+    await typeTerminalText(terminal, '\n$ Ejecutando modelo XGBoost...');
+    
+    // Mostrar proceso paso a paso de XGBoost
+    await typeTerminalText(terminal, `<span class="info">Preparando características para el modelo XGBoost...</span>`);
+    
+    // Crear y ejecutar el modelo XGBoost
+    const xgboostModel = new XGBoostModel();
+    
+    // Calcular características combinadas
+    await typeTerminalText(terminal, `<span class="highlight">Características combinadas:</span>`);
+    
+    const features = {
+        goalsScored: (stats1.goalsScored - stats2.goalsScored) / 5,
+        goalsConceded: (stats2.goalsConceded - stats1.goalsConceded) / 5,
+        possession: (stats1.possession - stats2.possession) / 100,
+        shotsOnTarget: (stats1.shotsOnTarget - stats2.shotsOnTarget) / 5,
+        passingAccuracy: (stats1.passingAccuracy - stats2.passingAccuracy) / 100,
+        combinedAttack: ((stats1.shotsOnTarget + stats1.corners) - (stats2.shotsOnTarget + stats2.corners)) / 5,
+        discipline: ((stats2.yellowCards + stats2.redCards * 3) - (stats1.yellowCards + stats1.redCards * 3)) / 5
+    };
+    
+    for (const [feature, value] of Object.entries(features)) {
+        await typeTerminalText(terminal, `<span class="info">${feature}:</span> ${value.toFixed(3)}`);
+        await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    // Mostrar proceso de árboles de decisión
+    await typeTerminalText(terminal, `<span class="highlight">Evaluando árboles de decisión...</span>`);
+    
+    for (let i = 0; i < xgboostModel.trees.length; i++) {
+        const tree = xgboostModel.trees[i];
+        const featureValue = features[tree.feature];
+        const path = featureValue <= tree.threshold ? "izquierda" : "derecha";
+        const contribution = featureValue <= tree.threshold ? 
+            tree.leftNode.value * tree.weight : 
+            tree.rightNode.value * tree.weight;
+        
+        await typeTerminalText(terminal, `<span class="info">Árbol ${i+1} (${tree.feature}):</span> Valor=${featureValue.toFixed(3)}, Umbral=${tree.threshold}, Camino=${path}, Contribución=${contribution.toFixed(3)}`);
+        await new Promise(resolve => setTimeout(resolve, 300));
+    }
+    
+    // Obtener las probabilidades
+    const xgboostProb = xgboostModel.predict(stats1, stats2);
+    
+    await typeTerminalText(terminal, `<span class="result">Probabilidad victoria ${team1} (XGBoost):</span> <span class="highlight">${xgboostProb.team1Win.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="result">Probabilidad empate (XGBoost):</span> <span class="highlight">${xgboostProb.draw.toFixed(2)}%</span>`);
+    await typeTerminalText(terminal, `<span class="result">Probabilidad victoria ${team2} (XGBoost):</span> <span class="highlight">${xgboostProb.team2Win.toFixed(2)}%</span>`);
+    
+    // Determinar modelo más confiable
+    const reliability = determineReliableModel(stats1, stats2, poissonProb, logisticProb, xgboostProb);
+    
+    await typeTerminalText(terminal, '\n$ Analizando confiabilidad de modelos...');
+    await typeTerminalText(terminal, `<span class="highlight">Escenario detectado:</span> ${reliability.scenario}`);
+    await typeTerminalText(terminal, `<span class="highlight">Modelo más confiable:</span> ${reliability.reliableModel}`);
+    
+    if (reliability.reliableModel === "Consenso") {
+        await typeTerminalText(terminal, `<span class="info">Probabilidad consenso ${team1}:</span> <span class="result">${reliability.consensusProb.team1Win.toFixed(2)}%</span>`);
+        await typeTerminalText(terminal, `<span class="info">Probabilidad consenso empate:</span> <span class="result">${reliability.consensusProb.draw.toFixed(2)}%</span>`);
+        await typeTerminalText(terminal, `<span class="info">Probabilidad consenso ${team2}:</span> <span class="result">${reliability.consensusProb.team2Win.toFixed(2)}%</span>`);
+    }
+    
+    // Actualizar resultados actuales con los nuevos modelos
+    currentResults.logisticRegression = {
+        team1Win: logisticProb.team1Win.toFixed(2),
+        draw: logisticProb.draw.toFixed(2),
+        team2Win: logisticProb.team2Win.toFixed(2)
+    };
+    
+    currentResults.xgboost = {
+        team1Win: xgboostProb.team1Win.toFixed(2),
+        draw: xgboostProb.draw.toFixed(2),
+        team2Win: xgboostProb.team2Win.toFixed(2)
+    };
+    
+    currentResults.modelReliability = {
+        scenario: reliability.scenario,
+        reliableModel: reliability.reliableModel,
+        consensusProb: reliability.consensusProb
+    };
+    
+    // Crear gráfico comparativo de modelos
+    createModelComparisonChart(team1, team2, poissonProb, logisticProb, xgboostProb);
+    
+    // Actualizar el modelo recomendado y la probabilidad más alta
+    updateRecommendedModel();
+    
+    // Mostrar sección de resultados con animación
+    await new Promise(resolve => setTimeout(resolve, 500));
+    predictionResults.classList.add('show');
+    
+    // Mostrar equipo favorito (ahora que tenemos todos los modelos)
+    document.getElementById('favorite-team').textContent = favoriteTeam;
+};

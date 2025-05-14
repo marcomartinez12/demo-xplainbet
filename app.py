@@ -61,6 +61,29 @@ def get_explanation():
         team2 = data['team2']
         favorite_team = data['favoriteTeam']
         win_probability = data['winProbability']
+        
+        # Obtener información del modelo recomendado si está disponible
+        recommended_model = data.get('modelReliability', {}).get('reliableModel', 'Poisson')
+        model_scenario = data.get('modelReliability', {}).get('scenario', '')
+        
+        # Obtener probabilidades de los diferentes modelos
+        poisson_prob = None
+        logistic_prob = None
+        xgboost_prob = None
+        
+        if favorite_team == team1['name']:
+            poisson_prob = team1.get('winProbability', 0)
+            logistic_prob = data.get('logisticRegression', {}).get('team1Win', 0)
+            xgboost_prob = data.get('xgboost', {}).get('team1Win', 0)
+        elif favorite_team == team2['name']:
+            poisson_prob = team2.get('winProbability', 0)
+            logistic_prob = data.get('logisticRegression', {}).get('team2Win', 0)
+            xgboost_prob = data.get('xgboost', {}).get('team2Win', 0)
+        else:
+            # Si es empate
+            poisson_prob = data.get('drawProbability', 0)
+            logistic_prob = data.get('logisticRegression', {}).get('draw', 0)
+            xgboost_prob = data.get('xgboost', {}).get('draw', 0)
 
         # Construir prompt para la API
         prompt = f"""
@@ -92,7 +115,15 @@ Puntuación calculada:
 - {team1['name']}: {team1.get('score', team1.get('lambda', 0))} puntos ({team1.get('probability', team1.get('winProbability'))}%)
 - {team2['name']}: {team2.get('score', team2.get('lambda', 0))} puntos ({team2.get('probability', team2.get('winProbability'))}%)
 
-Por favor, proporciona una explicación detallada y personalizada de por qué {favorite_team} tiene mayor probabilidad de ganar, basándote en las estadísticas proporcionadas. Compara los puntos fuertes y débiles de ambos equipos. Usa un tono profesional pero amigable, como si estuvieras explicando en un programa deportivo.
+Resultados de diferentes modelos predictivos:
+- Modelo de Poisson: {poisson_prob}%
+- Modelo de Regresión Logística: {logistic_prob}%
+- Modelo XGBoost: {xgboost_prob}%
+
+Modelo recomendado: {recommended_model}
+Escenario detectado: {model_scenario}
+
+Por favor, proporciona una explicación detallada y personalizada de por qué {favorite_team} tiene mayor probabilidad de ganar, basándote en las estadísticas proporcionadas. Compara los puntos fuertes y débiles de ambos equipos. Explica también por qué el modelo {recommended_model} es el más confiable para este escenario específico. Usa un tono profesional pero amigable, como si estuvieras explicando en un programa deportivo.
 """
 
         headers = {
