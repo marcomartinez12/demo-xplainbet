@@ -134,8 +134,9 @@ Por favor, proporciona una explicación detallada y personalizada de por qué {f
         # Lista de modelos a probar, en orden de preferencia
         fallback_models = [
         "meta-llama/llama-4-maverick:free",
+        "mistralai/mistral-small-24b-instruct-2501:free",
         "moonshotai/kimi-vl-a3b-thinking:free",
-        "mistralai/mistral-small-3:free"
+        
         ]
 
         
