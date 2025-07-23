@@ -17,6 +17,7 @@ let animationSpeed = 600; // Velocidad de las animaciones en ms
 let calculationDelay = 800; // Retraso entre cálculos para la animación
 let currentResults = null;
 let typingSpeed = 20; // Velocidad de tipeo en ms por caracter
+let phonkPlayer = null; // Reproductor de música phonk
 
 // Evento al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -25,6 +26,43 @@ document.addEventListener('DOMContentLoaded', function() {
     const demoButton = document.getElementById('demo-btn');
     const explanationBtn = document.getElementById('explanation-btn');
     const clearButton = document.getElementById('clear-btn');
+
+    // Inicializar el reproductor de música phonk
+    phonkPlayer = new PhonkMusicPlayer();
+    
+    // Control de volumen para la música phonk
+    const volumeControl = document.getElementById('phonk-volume');
+    if (volumeControl) {
+        volumeControl.addEventListener('input', function() {
+            if (phonkPlayer) {
+                // Convertir el valor del rango (0-100) a escala de volumen (0-1)
+                const volume = this.value / 100;
+                phonkPlayer.setVolume(volume);
+            }
+        });
+    }
+    
+    // Botón para activar/desactivar música phonk manualmente
+    const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
+    if (togglePhonkBtn) {
+        togglePhonkBtn.addEventListener('click', function() {
+            if (phonkPlayer) {
+                if (phonkPlayer.isPlaying) {
+                    // Pausar música
+                    phonkPlayer.pause();
+                    this.innerHTML = '<i class="fas fa-play me-1"></i>Activar Música';
+                    this.classList.remove('btn-outline-danger');
+                    this.classList.add('btn-outline-success');
+                } else {
+                    // Reproducir música
+                    phonkPlayer.play();
+                    this.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música';
+                    this.classList.remove('btn-outline-success');
+                    this.classList.add('btn-outline-danger');
+                }
+            }
+        });
+    }
 
     // Validación de campos numéricos
     document.querySelectorAll('.stats-input').forEach(input => {
@@ -182,6 +220,20 @@ function factorial(n) {
 
 // Función para calcular la predicción usando Poisson
 async function calculatePrediction() {
+    // Reproducir música phonk durante el cálculo
+    if (phonkPlayer) {
+        phonkPlayer.play();
+        // Se añadirá un mensaje en la terminal después de inicializarla
+        
+        // Actualizar el botón de música
+        const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
+        if (togglePhonkBtn) {
+            togglePhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música';
+            togglePhonkBtn.classList.remove('btn-outline-success');
+            togglePhonkBtn.classList.add('btn-outline-danger');
+        }
+    }
+    
     // Mostrar sección de resultados
     document.getElementById('results-section').style.display = 'block';
     
@@ -211,6 +263,7 @@ async function calculatePrediction() {
     
     // Iniciar animación de cálculo en la terminal
     await typeTerminalText(terminal, `$ Iniciando cálculo de predicción con modelo de Poisson...`);
+    await typeTerminalText(terminal, `$ <span class="highlight">🎵 Reproduciendo KORDHELL - MURDER IN MY MIND durante el cálculo... 🎵</span>`);
     await typeTerminalText(terminal, `$ Analizando estadísticas para ${team1} y ${team2}...`);
     await new Promise(resolve => setTimeout(resolve, calculationDelay));
     
@@ -308,6 +361,21 @@ async function calculatePrediction() {
     // Mostrar sección de resultados con animación
     await new Promise(resolve => setTimeout(resolve, 500));
     predictionResults.classList.add('show');
+    
+    // Pausar la música phonk cuando finaliza el cálculo
+    if (phonkPlayer) {
+        phonkPlayer.pause();
+        // Añadir mensaje en la terminal indicando que la música se ha detenido
+        await typeTerminalText(terminal, `$ <span class="info">🎵 KORDHELL - MURDER IN MY MIND pausada. Cálculo completado. 🎵</span>`);
+        
+        // Actualizar el botón de música
+        const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
+        if (togglePhonkBtn) {
+            togglePhonkBtn.innerHTML = '<i class="fas fa-play me-1"></i>Activar Música';
+            togglePhonkBtn.classList.remove('btn-outline-danger');
+            togglePhonkBtn.classList.add('btn-outline-success');
+        }
+    }
 }
 
 // Función para calcular la lambda (tasa de goles esperados) para un equipo

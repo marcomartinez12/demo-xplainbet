@@ -19,6 +19,33 @@ header {
     margin-bottom: 2.5rem;
 }
 
+/* Estilos para el control de música phonk */
+.phonk-controls {
+    background-color: rgba(193, 255, 53, 0.1);
+    border-radius: 10px;
+    padding: 10px;
+    margin-top: 15px;
+    transition: all 0.3s ease;
+}
+
+.phonk-controls.playing {
+    background-color: rgba(193, 255, 53, 0.3);
+    box-shadow: 0 0 15px rgba(193, 255, 53, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(193, 255, 53, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(193, 255, 53, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(193, 255, 53, 0);
+    }
+}
+
 header h1 {
     font-weight: 800;
     color: #c1ff35; /* Verde amarillento de OneFootball */
