@@ -13,7 +13,7 @@ class PhonkMusicPlayer {
         
         // Canción phonk específica solicitada por el usuario
         this.playlist = [
-            'https://audio-previews.elements.envatousercontent.com/files/273402066/preview.mp3' // KORDHELL - MURDER IN MY MIND (versión adaptada para web)
+            '/static/audio/phonk_music.mp3' // Archivo de música phonk local
         ];
 
         // Configurar el audio para que se reproduzca en bucle
@@ -25,25 +25,43 @@ class PhonkMusicPlayer {
 
     play() {
         if (!this.isPlaying) {
-            // Seleccionar una canción aleatoria de la lista
-            const randomIndex = Math.floor(Math.random() * this.playlist.length);
-            this.audio.src = this.playlist[randomIndex];
-            
-            // Reproducir la música
-            this.audio.play()
-                .then(() => {
-                    this.isPlaying = true;
-                    console.log('Reproduciendo KORDHELL - MURDER IN MY MIND');
-                    
-                    // Añadir clase visual para indicar que está sonando
-                    const phonkControls = document.querySelector('.phonk-controls');
-                    if (phonkControls) {
-                        phonkControls.classList.add('playing');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error al reproducir música:', error);
+            try {
+                // Seleccionar una canción aleatoria de la lista
+                const randomIndex = Math.floor(Math.random() * this.playlist.length);
+                const songUrl = this.playlist[randomIndex];
+                console.log('Intentando reproducir canción desde URL:', songUrl);
+                
+                this.audio.src = songUrl;
+                
+                // Añadir manejadores de eventos para depuración
+                this.audio.addEventListener('canplay', () => {
+                    console.log('El audio está listo para reproducirse');
                 });
+                
+                this.audio.addEventListener('error', (e) => {
+                    console.error('Error en el elemento de audio:', e);
+                    console.error('Código de error:', this.audio.error ? this.audio.error.code : 'desconocido');
+                    console.error('Mensaje de error:', this.audio.error ? this.audio.error.message : 'desconocido');
+                });
+                
+                // Reproducir la música
+                this.audio.play()
+                    .then(() => {
+                        this.isPlaying = true;
+                        console.log('Reproduciendo música phonk descargada');
+                        
+                        // Añadir clase visual para indicar que está sonando
+                        const phonkControls = document.querySelector('.phonk-controls');
+                        if (phonkControls) {
+                            phonkControls.classList.add('playing');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al reproducir música:', error);
+                    });
+            } catch (error) {
+                console.error('Error general al intentar reproducir:', error);
+            }
         }
     }
 
@@ -51,7 +69,7 @@ class PhonkMusicPlayer {
         if (this.isPlaying) {
             this.audio.pause();
             this.isPlaying = false;
-            console.log('KORDHELL - MURDER IN MY MIND pausada');
+            console.log('Música phonk pausada');
             
             // Quitar clase visual cuando se pausa la música
             const phonkControls = document.querySelector('.phonk-controls');

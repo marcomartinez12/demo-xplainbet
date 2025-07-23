@@ -263,7 +263,7 @@ async function calculatePrediction() {
     
     // Iniciar animación de cálculo en la terminal
     await typeTerminalText(terminal, `$ Iniciando cálculo de predicción con modelo de Poisson...`);
-    await typeTerminalText(terminal, `$ <span class="highlight">🎵 Reproduciendo KORDHELL - MURDER IN MY MIND durante el cálculo... 🎵</span>`);
+    await typeTerminalText(terminal, `$ <span class="highlight">🎵 Reproduciendo Música Phonk durante el cálculo... 🎵</span>`);
     await typeTerminalText(terminal, `$ Analizando estadísticas para ${team1} y ${team2}...`);
     await new Promise(resolve => setTimeout(resolve, calculationDelay));
     
@@ -366,7 +366,7 @@ async function calculatePrediction() {
     if (phonkPlayer) {
         phonkPlayer.pause();
         // Añadir mensaje en la terminal indicando que la música se ha detenido
-        await typeTerminalText(terminal, `$ <span class="info">🎵 KORDHELL - MURDER IN MY MIND pausada. Cálculo completado. 🎵</span>`);
+        await typeTerminalText(terminal, `$ <span class="info">🎵 Música Phonk pausada. Cálculo completado. 🎵</span>`);
         
         // Actualizar el botón de música
         const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
