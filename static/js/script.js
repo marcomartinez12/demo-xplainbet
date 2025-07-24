@@ -65,50 +65,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }, { once: true }); // Solo necesitamos un clic para desbloquear
     
-    // Añadir evento para el botón de prueba de música
-    const testPhonkBtn = document.getElementById('test-phonk-btn');
-    if (testPhonkBtn) {
-        testPhonkBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log('Botón de prueba de música phonk presionado');
-            
-            if (phonkPlayer) {
-                if (phonkPlayer.isPlaying) {
-                    phonkPlayer.pause();
-                    testPhonkBtn.innerHTML = '<i class="fas fa-play me-1"></i>Probar Música Phonk';
-                    console.log('Música phonk pausada manualmente');
-                } else {
-                    // Crear un contexto de audio para desbloquear la reproducción
-                    try {
-                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        audioContext.resume().then(() => {
-                            console.log('AudioContext reanudado para prueba de música');
-                            // Intentar reproducir un sonido silencioso primero
-                            const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-                            const source = audioContext.createBufferSource();
-                            source.buffer = silentBuffer;
-                            source.connect(audioContext.destination);
-                            source.start(0);
-                            
-                            // Ahora reproducir la música real
-                            setTimeout(() => {
-                                phonkPlayer.play();
-                                testPhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música Phonk';
-                                console.log('Música phonk iniciada manualmente');
-                            }, 100);
-                        });
-                    } catch (error) {
-                        console.error('Error al intentar reproducir música de prueba:', error);
-                        // Intentar reproducir directamente como último recurso
-                        phonkPlayer.play();
-                        testPhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música Phonk';
-                    }
-                }
-            } else {
-                console.error('El reproductor phonk no está inicializado');
-            }
-        });
-    }
+    // El botón de prueba de música ha sido eliminado
+    // La música ahora se controla con el botón x2
     
     // La música phonk se reproducirá automáticamente durante el cálculo
     console.log('Reproductor de música phonk inicializado. Se activará automáticamente durante el cálculo.');
@@ -144,9 +102,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 calculationDelay = 400; // De 800 a 400
                 typingSpeed = 10; // De 20 a 10
                 
-                // Si hay música reproduciéndose, asegurarse de que continúe
-                if (phonkPlayer && !phonkPlayer.isPlaying) {
-                    phonkPlayer.play();
+                // Reproducir música Phonk automáticamente
+                if (phonkPlayer) {
+                    // Crear un contexto de audio para desbloquear la reproducción
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        audioContext.resume().then(() => {
+                            console.log('AudioContext reanudado para reproducción de música');
+                            // Intentar reproducir un sonido silencioso primero
+                            const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+                            const source = audioContext.createBufferSource();
+                            source.buffer = silentBuffer;
+                            source.connect(audioContext.destination);
+                            source.start(0);
+                            
+                            // Ahora reproducir la música real
+                            setTimeout(() => {
+                                phonkPlayer.play();
+                                console.log('Música phonk iniciada automáticamente con x2');
+                            }, 100);
+                        });
+                    } catch (error) {
+                        console.error('Error al intentar reproducir música:', error);
+                        // Intentar reproducir directamente como último recurso
+                        phonkPlayer.play();
+                    }
                 }
                 
                 // Mostrar mensaje en la terminal si está visible
@@ -154,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (terminal && terminal.children.length > 0) {
                     const line = document.createElement('div');
                     line.className = 'line';
-                    line.innerHTML = '<span class="highlight">🚀 Modo velocidad x2 activado! La música continuará sonando.</span>';
+                    line.innerHTML = '<span class="highlight">🚀 Modo velocidad x2 activado! 🎵 Música Phonk activada. 🎵</span>';
                     terminal.appendChild(line);
                     terminal.scrollTop = terminal.scrollHeight;
                 }
@@ -168,12 +148,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 calculationDelay = 800;
                 typingSpeed = 20;
                 
+                // Pausar la música Phonk
+                if (phonkPlayer && phonkPlayer.isPlaying) {
+                    phonkPlayer.pause();
+                    console.log('Música phonk pausada al desactivar x2');
+                }
+                
                 // Mostrar mensaje en la terminal si está visible
                 const terminal = document.getElementById('terminal-content');
                 if (terminal && terminal.children.length > 0) {
                     const line = document.createElement('div');
                     line.className = 'line';
-                    line.innerHTML = '<span class="info">🐢 Velocidad normal restaurada.</span>';
+                    line.innerHTML = '<span class="info">🐢 Velocidad normal restaurada. 🎵 Música Phonk pausada. 🎵</span>';
                     terminal.appendChild(line);
                     terminal.scrollTop = terminal.scrollHeight;
                 }
@@ -321,39 +307,11 @@ function factorial(n) {
 
 // Función para calcular la predicción usando Poisson
 async function calculatePrediction() {
-    // Reproducir música phonk durante el cálculo
-    if (phonkPlayer) {
-        console.log('Intentando reproducir música phonk...');
-        // Intentar reproducir la música con un pequeño retraso para asegurar que todo esté listo
-        setTimeout(() => {
-            try {
-                // Crear un contexto de audio para desbloquear la reproducción
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                audioContext.resume().then(() => {
-                    console.log('AudioContext reanudado');
-                    // Intentar reproducir un sonido silencioso primero para desbloquear el audio
-                    const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-                    const source = audioContext.createBufferSource();
-                    source.buffer = silentBuffer;
-                    source.connect(audioContext.destination);
-                    source.start(0);
-                    console.log('Sonido silencioso reproducido para desbloquear audio');
-                    
-                    // Ahora intentar reproducir la música real con un pequeño retraso
-                    setTimeout(() => {
-                        phonkPlayer.play();
-                        console.log('Comando de reproducción enviado al reproductor phonk');
-                    }, 100);
-                });
-            } catch (error) {
-                console.error('Error al intentar reproducir música:', error);
-                // Intentar reproducir directamente como último recurso
-                phonkPlayer.play();
-            }
-        }, 300); // Pequeño retraso para asegurar que la página esté lista
-        // Se añadirá un mensaje en la terminal después de inicializarla
-    } else {
-        console.error('El reproductor phonk no está inicializado');
+    // La música phonk ahora se controla exclusivamente con el botón x2
+    // Solo reproducimos música si el modo velocidad x2 está activado
+    if (isSpeedMode && phonkPlayer && !phonkPlayer.isPlaying) {
+        console.log('Modo x2 activo, asegurando que la música esté sonando...');
+        phonkPlayer.play();
     }
     
     // Mostrar sección de resultados
@@ -385,7 +343,11 @@ async function calculatePrediction() {
     
     // Iniciar animación de cálculo en la terminal
     await typeTerminalText(terminal, `$ Iniciando cálculo de predicción con modelo de Poisson...`);
-    await typeTerminalText(terminal, `$ <span class="highlight">🎵 Reproduciendo Música Phonk durante el cálculo... 🎵</span>`);
+    if (isSpeedMode && phonkPlayer && phonkPlayer.isPlaying) {
+        await typeTerminalText(terminal, `$ <span class="highlight">🎵 Música Phonk activa en modo velocidad x2... 🎵</span>`);
+    } else {
+        await typeTerminalText(terminal, `$ <span class="info">💡 Activa el modo x2 para escuchar música Phonk durante el análisis.</span>`);
+    }
     await typeTerminalText(terminal, `$ Analizando estadísticas para ${team1} y ${team2}...`);
     await new Promise(resolve => setTimeout(resolve, calculationDelay));
     
@@ -484,14 +446,14 @@ async function calculatePrediction() {
     await new Promise(resolve => setTimeout(resolve, 500));
     predictionResults.classList.add('show');
     
-    // Pausar la música phonk cuando finaliza el cálculo, solo si no está en modo velocidad x2
-    if (phonkPlayer && !isSpeedMode) {
-        phonkPlayer.pause();
-        // Añadir mensaje en la terminal indicando que la música se ha detenido
-        await typeTerminalText(terminal, `$ <span class="info">🎵 Música Phonk pausada. Cálculo completado. 🎵</span>`);
-    } else if (phonkPlayer && isSpeedMode) {
-        // En modo velocidad x2, mantener la música y mostrar mensaje
+    // La música phonk ahora se controla exclusivamente con el botón x2
+    // No pausamos la música al finalizar el cálculo, solo mostramos un mensaje informativo
+    if (phonkPlayer && isSpeedMode && phonkPlayer.isPlaying) {
+        // En modo velocidad x2, mostrar mensaje de que la música continúa
         await typeTerminalText(terminal, `$ <span class="highlight">🎵 Música Phonk continúa sonando en modo velocidad x2. 🎵</span>`);
+    } else if (phonkPlayer && !isSpeedMode) {
+        // En modo normal, mostrar mensaje de que no hay música
+        await typeTerminalText(terminal, `$ <span class="info">🎵 Activa el modo x2 para escuchar música Phonk. 🎵</span>`);
     }
 }
 
