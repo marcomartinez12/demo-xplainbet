@@ -128,12 +128,16 @@
                                 </button>
                                 <div class="mt-3 phonk-controls" style="display: flex; align-items: center; justify-content: center;">
                                     <i class="fas fa-music me-2"></i>
-                                    <label for="phonk-volume" class="form-label me-2">Música Phonk:</label>
+                                    <label for="phonk-volume" class="form-label me-2">Volumen Música Phonk:</label>
                                     <input type="range" class="form-range" min="0" max="100" value="50" id="phonk-volume" style="width: 200px;">
-                                    <button type="button" class="btn btn-sm btn-outline-success ms-3" id="toggle-phonk-btn">
-                                        <i class="fas fa-play me-1"></i>Activar Música
-                                    </button>
+                                    <span class="ms-3 text-muted small">(La música se reproducirá automáticamente durante el cálculo)</span>
                                 </div>
+                                <div class="alert alert-info mt-2" role="alert">
+                                    <strong>Importante:</strong> Haz clic en cualquier parte de la página para habilitar la reproducción de audio. Los navegadores modernos requieren interacción del usuario antes de permitir la reproducción automática.
+                                </div>
+                                <button id="test-phonk-btn" class="btn btn-sm btn-primary mt-2">
+                                    <i class="fas fa-play me-1"></i>Probar Música Phonk
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -153,6 +157,9 @@
                             <div class="terminal-header">
                                 <span class="terminal-title">Cálculo en vivo</span>
                                 <div class="terminal-controls">
+                                    <button id="speed-toggle-btn" class="btn btn-sm btn-warning" title="Aumentar velocidad x2">
+                                        <i class="fas fa-forward"></i> x2
+                                    </button>
                                     <span class="terminal-control close"></span>
                                     <span class="terminal-control minimize"></span>
                                     <span class="terminal-control maximize"></span>

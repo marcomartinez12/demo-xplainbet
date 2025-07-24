@@ -18,6 +18,7 @@ let calculationDelay = 800; // Retraso entre cálculos para la animación
 let currentResults = null;
 let typingSpeed = 20; // Velocidad de tipeo en ms por caracter
 let phonkPlayer = null; // Reproductor de música phonk
+let isSpeedMode = false; // Modo de velocidad x2
 
 // Evento al cargar el DOM
 document.addEventListener('DOMContentLoaded', function() {
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const demoButton = document.getElementById('demo-btn');
     const explanationBtn = document.getElementById('explanation-btn');
     const clearButton = document.getElementById('clear-btn');
+    const speedToggleBtn = document.getElementById('speed-toggle-btn');
 
     // Inicializar el reproductor de música phonk
     phonkPlayer = new PhonkMusicPlayer();
@@ -42,27 +44,74 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Botón para activar/desactivar música phonk manualmente
-    const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
-    if (togglePhonkBtn) {
-        togglePhonkBtn.addEventListener('click', function() {
+    // Añadir un evento de clic en el documento para habilitar la reproducción de audio
+    document.addEventListener('click', function() {
+        console.log('Clic detectado en el documento, intentando habilitar audio...');
+        // Crear un contexto de audio para desbloquear la reproducción
+        try {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioContext.resume().then(() => {
+                console.log('AudioContext reanudado después del clic del usuario');
+                // Intentar reproducir un sonido silencioso para desbloquear el audio
+                const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = silentBuffer;
+                source.connect(audioContext.destination);
+                source.start(0);
+                console.log('Sonido silencioso reproducido para desbloquear audio');
+            });
+        } catch (error) {
+            console.error('Error al crear/reanudar AudioContext:', error);
+        }
+    }, { once: true }); // Solo necesitamos un clic para desbloquear
+    
+    // Añadir evento para el botón de prueba de música
+    const testPhonkBtn = document.getElementById('test-phonk-btn');
+    if (testPhonkBtn) {
+        testPhonkBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Botón de prueba de música phonk presionado');
+            
             if (phonkPlayer) {
                 if (phonkPlayer.isPlaying) {
-                    // Pausar música
                     phonkPlayer.pause();
-                    this.innerHTML = '<i class="fas fa-play me-1"></i>Activar Música';
-                    this.classList.remove('btn-outline-danger');
-                    this.classList.add('btn-outline-success');
+                    testPhonkBtn.innerHTML = '<i class="fas fa-play me-1"></i>Probar Música Phonk';
+                    console.log('Música phonk pausada manualmente');
                 } else {
-                    // Reproducir música
-                    phonkPlayer.play();
-                    this.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música';
-                    this.classList.remove('btn-outline-success');
-                    this.classList.add('btn-outline-danger');
+                    // Crear un contexto de audio para desbloquear la reproducción
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        audioContext.resume().then(() => {
+                            console.log('AudioContext reanudado para prueba de música');
+                            // Intentar reproducir un sonido silencioso primero
+                            const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+                            const source = audioContext.createBufferSource();
+                            source.buffer = silentBuffer;
+                            source.connect(audioContext.destination);
+                            source.start(0);
+                            
+                            // Ahora reproducir la música real
+                            setTimeout(() => {
+                                phonkPlayer.play();
+                                testPhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música Phonk';
+                                console.log('Música phonk iniciada manualmente');
+                            }, 100);
+                        });
+                    } catch (error) {
+                        console.error('Error al intentar reproducir música de prueba:', error);
+                        // Intentar reproducir directamente como último recurso
+                        phonkPlayer.play();
+                        testPhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música Phonk';
+                    }
                 }
+            } else {
+                console.error('El reproductor phonk no está inicializado');
             }
         });
     }
+    
+    // La música phonk se reproducirá automáticamente durante el cálculo
+    console.log('Reproductor de música phonk inicializado. Se activará automáticamente durante el cálculo.');
 
     // Validación de campos numéricos
     document.querySelectorAll('.stats-input').forEach(input => {
@@ -79,6 +128,58 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mostrar explicación de IA
     explanationBtn.addEventListener('click', showAIExplanation);
+    
+    // Manejador para el botón de velocidad x2
+    if (speedToggleBtn) {
+        speedToggleBtn.addEventListener('click', function() {
+            isSpeedMode = !isSpeedMode;
+            
+            if (isSpeedMode) {
+                // Activar modo velocidad x2
+                speedToggleBtn.classList.add('active');
+                speedToggleBtn.innerHTML = '<i class="fas fa-forward"></i> x2 ON';
+                
+                // Duplicar la velocidad reduciendo los tiempos a la mitad
+                animationSpeed = 300; // De 600 a 300
+                calculationDelay = 400; // De 800 a 400
+                typingSpeed = 10; // De 20 a 10
+                
+                // Si hay música reproduciéndose, asegurarse de que continúe
+                if (phonkPlayer && !phonkPlayer.isPlaying) {
+                    phonkPlayer.play();
+                }
+                
+                // Mostrar mensaje en la terminal si está visible
+                const terminal = document.getElementById('terminal-content');
+                if (terminal && terminal.children.length > 0) {
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    line.innerHTML = '<span class="highlight">🚀 Modo velocidad x2 activado! La música continuará sonando.</span>';
+                    terminal.appendChild(line);
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            } else {
+                // Desactivar modo velocidad x2
+                speedToggleBtn.classList.remove('active');
+                speedToggleBtn.innerHTML = '<i class="fas fa-forward"></i> x2';
+                
+                // Restaurar velocidades originales
+                animationSpeed = 600;
+                calculationDelay = 800;
+                typingSpeed = 20;
+                
+                // Mostrar mensaje en la terminal si está visible
+                const terminal = document.getElementById('terminal-content');
+                if (terminal && terminal.children.length > 0) {
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    line.innerHTML = '<span class="info">🐢 Velocidad normal restaurada.</span>';
+                    terminal.appendChild(line);
+                    terminal.scrollTop = terminal.scrollHeight;
+                }
+            }
+        });
+    }
 
     // Envío del formulario
     form.addEventListener('submit', function(e) {
@@ -222,16 +323,37 @@ function factorial(n) {
 async function calculatePrediction() {
     // Reproducir música phonk durante el cálculo
     if (phonkPlayer) {
-        phonkPlayer.play();
+        console.log('Intentando reproducir música phonk...');
+        // Intentar reproducir la música con un pequeño retraso para asegurar que todo esté listo
+        setTimeout(() => {
+            try {
+                // Crear un contexto de audio para desbloquear la reproducción
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioContext.resume().then(() => {
+                    console.log('AudioContext reanudado');
+                    // Intentar reproducir un sonido silencioso primero para desbloquear el audio
+                    const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+                    const source = audioContext.createBufferSource();
+                    source.buffer = silentBuffer;
+                    source.connect(audioContext.destination);
+                    source.start(0);
+                    console.log('Sonido silencioso reproducido para desbloquear audio');
+                    
+                    // Ahora intentar reproducir la música real con un pequeño retraso
+                    setTimeout(() => {
+                        phonkPlayer.play();
+                        console.log('Comando de reproducción enviado al reproductor phonk');
+                    }, 100);
+                });
+            } catch (error) {
+                console.error('Error al intentar reproducir música:', error);
+                // Intentar reproducir directamente como último recurso
+                phonkPlayer.play();
+            }
+        }, 300); // Pequeño retraso para asegurar que la página esté lista
         // Se añadirá un mensaje en la terminal después de inicializarla
-        
-        // Actualizar el botón de música
-        const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
-        if (togglePhonkBtn) {
-            togglePhonkBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pausar Música';
-            togglePhonkBtn.classList.remove('btn-outline-success');
-            togglePhonkBtn.classList.add('btn-outline-danger');
-        }
+    } else {
+        console.error('El reproductor phonk no está inicializado');
     }
     
     // Mostrar sección de resultados
@@ -362,19 +484,14 @@ async function calculatePrediction() {
     await new Promise(resolve => setTimeout(resolve, 500));
     predictionResults.classList.add('show');
     
-    // Pausar la música phonk cuando finaliza el cálculo
-    if (phonkPlayer) {
+    // Pausar la música phonk cuando finaliza el cálculo, solo si no está en modo velocidad x2
+    if (phonkPlayer && !isSpeedMode) {
         phonkPlayer.pause();
         // Añadir mensaje en la terminal indicando que la música se ha detenido
         await typeTerminalText(terminal, `$ <span class="info">🎵 Música Phonk pausada. Cálculo completado. 🎵</span>`);
-        
-        // Actualizar el botón de música
-        const togglePhonkBtn = document.getElementById('toggle-phonk-btn');
-        if (togglePhonkBtn) {
-            togglePhonkBtn.innerHTML = '<i class="fas fa-play me-1"></i>Activar Música';
-            togglePhonkBtn.classList.remove('btn-outline-danger');
-            togglePhonkBtn.classList.add('btn-outline-success');
-        }
+    } else if (phonkPlayer && isSpeedMode) {
+        // En modo velocidad x2, mantener la música y mostrar mensaje
+        await typeTerminalText(terminal, `$ <span class="highlight">🎵 Música Phonk continúa sonando en modo velocidad x2. 🎵</span>`);
     }
 }
 
